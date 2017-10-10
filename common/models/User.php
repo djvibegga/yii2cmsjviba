@@ -1,131 +1,127 @@
 <?php
+
 namespace common\models;
 
 use Yii;
-use yii\base\NotSupportedException;
-use yii\behaviors\TimestampBehavior;
-use yii\db\ActiveRecord;
 use yii\web\IdentityInterface;
+use yii\behaviors\TimestampBehavior;
 
 /**
- * User model
+ * This is the model class for table "user".
  *
  * @property integer $id
- * @property string $username
- * @property string $password_hash
- * @property string $password_reset_token
- * @property string $email
- * @property string $auth_key
+ * @property integer $object_id
  * @property integer $status
- * @property integer $created_at
- * @property integer $updated_at
- * @property string $password write-only password
+ * @property integer $role
+ * @property string  $email
+ * @property string  $created_at
+ * @property string  $updated_at
+ * @property string  $username
+ * @property string  $auth_key
+ * @property string  $password_hash
+ * @property string  $password_reset_token
+ *
+ * @property Article[] $articles
+ * @property ObjectView[] $objectViews
  */
-class User extends ActiveRecord implements IdentityInterface
+class User extends \yii\db\ActiveRecord implements IdentityInterface
 {
-    const STATUS_DELETED = 0;
-    const STATUS_ACTIVE = 10;
-
-
     /**
      * @inheritdoc
      */
     public static function tableName()
     {
-        return '{{%user}}';
+        return 'user';
     }
-
+    
     /**
-     * @inheritdoc
+     * {@inheritDoc}
+     * @see \yii\base\Component::behaviors()
      */
     public function behaviors()
     {
         return [
-            TimestampBehavior::className(),
-        ];
+            'timestamp' => [
+                'class' => TimestampBehavior::className(),
+                'createdAtAttribute' => 'created_at',
+                'updatedAtAttribute' => 'updated_at',
+                'value' => function() {
+                return new \yii\db\Expression('NOW()');
+                },
+                ]
+                ];
     }
-
+    
     /**
      * @inheritdoc
      */
     public function rules()
     {
         return [
-            ['status', 'default', 'value' => self::STATUS_ACTIVE],
-            ['status', 'in', 'range' => [self::STATUS_ACTIVE, self::STATUS_DELETED]],
+            [['status', 'role'], 'integer'],
+            [['email', 'auth_key', 'password_hash'], 'required'],
+            [['created_at', 'updated_at'], 'safe'],
+            [['email', 'username', 'password_hash', 'password_reset_token'], 'string', 'max' => 255],
+            [['auth_key'], 'string', 'max' => 32],
+            [['email'], 'unique'],
+            [['password_reset_token'], 'unique'],
         ];
     }
-
+    
+    /**
+     * @inheritdoc
+     */
+    public function attributeLabels()
+    {
+        return [
+            'id' => 'ID',
+            'object_id' => 'Object ID',
+            'status' => 'Status',
+            'role' => 'Role',
+            'email' => 'Email',
+            'created_at' => 'Created At',
+            'updated_at' => 'Updated At',
+            'username' => 'Username',
+            'auth_key' => 'Auth Key',
+            'password_hash' => 'Password Hash',
+            'password_reset_token' => 'Password Reset Token',
+        ];
+    }
+    
     /**
      * @inheritdoc
      */
     public static function findIdentity($id)
     {
-        return static::findOne(['id' => $id, 'status' => self::STATUS_ACTIVE]);
+        return self::findOne($id);
     }
-
+    
     /**
      * @inheritdoc
      */
     public static function findIdentityByAccessToken($token, $type = null)
     {
-        throw new NotSupportedException('"findIdentityByAccessToken" is not implemented.');
+        return null;
     }
-
+    
     /**
-     * Finds user by username
-     *
-     * @param string $username
+     * Finds user by email
+     * @param string $email
      * @return static|null
      */
-    public static function findByUsername($username)
+    public static function findByEmail($email)
     {
-        return static::findOne(['username' => $username, 'status' => self::STATUS_ACTIVE]);
+        return self::findOne(['LOWER(email)' => strtolower($email)]);
     }
-
-    /**
-     * Finds user by password reset token
-     *
-     * @param string $token password reset token
-     * @return static|null
-     */
-    public static function findByPasswordResetToken($token)
-    {
-        if (!static::isPasswordResetTokenValid($token)) {
-            return null;
-        }
-
-        return static::findOne([
-            'password_reset_token' => $token,
-            'status' => self::STATUS_ACTIVE,
-        ]);
-    }
-
-    /**
-     * Finds out if password reset token is valid
-     *
-     * @param string $token password reset token
-     * @return bool
-     */
-    public static function isPasswordResetTokenValid($token)
-    {
-        if (empty($token)) {
-            return false;
-        }
-
-        $timestamp = (int) substr($token, strrpos($token, '_') + 1);
-        $expire = Yii::$app->params['user.passwordResetTokenExpire'];
-        return $timestamp + $expire >= time();
-    }
-
+    
     /**
      * @inheritdoc
      */
     public function getId()
     {
-        return $this->getPrimaryKey();
+        return $this->id;
     }
-
+    
     /**
      * @inheritdoc
      */
@@ -133,15 +129,15 @@ class User extends ActiveRecord implements IdentityInterface
     {
         return $this->auth_key;
     }
-
+    
     /**
      * @inheritdoc
      */
     public function validateAuthKey($authKey)
     {
-        return $this->getAuthKey() === $authKey;
+        return $this->auth_key === $authKey;
     }
-
+    
     /**
      * Validates password
      *
@@ -152,38 +148,28 @@ class User extends ActiveRecord implements IdentityInterface
     {
         return Yii::$app->security->validatePassword($password, $this->password_hash);
     }
-
+    
     /**
-     * Generates password hash from password and sets it to the model
-     *
      * @param string $password
      */
     public function setPassword($password)
     {
         $this->password_hash = Yii::$app->security->generatePasswordHash($password);
     }
-
+    
     /**
-     * Generates "remember me" authentication key
+     * @return \yii\db\ActiveQuery
      */
-    public function generateAuthKey()
+    public function getArticles()
     {
-        $this->auth_key = Yii::$app->security->generateRandomString();
+        return $this->hasMany(Article::className(), ['user_id' => 'id']);
     }
-
+    
     /**
-     * Generates new password reset token
+     * @return \yii\db\ActiveQuery
      */
-    public function generatePasswordResetToken()
+    public function getObjectViews()
     {
-        $this->password_reset_token = Yii::$app->security->generateRandomString() . '_' . time();
-    }
-
-    /**
-     * Removes password reset token
-     */
-    public function removePasswordResetToken()
-    {
-        $this->password_reset_token = null;
+        return $this->hasMany(ObjectView::className(), ['user_id' => 'id']);
     }
 }
