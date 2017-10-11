@@ -180,4 +180,28 @@ class User extends \yii\db\ActiveRecord implements IdentityInterface
     {
         return $this->hasMany(ObjectView::className(), ['user_id' => 'id']);
     }
+    
+    /**
+     * Returns map of available statuses
+     * @return string[]
+     */
+    public static function getAvailableStatuses()
+    {
+        return [
+            self::STATUS_ACTIVE => Yii::t('app', 'Active'),
+            self::STATUS_DELETED => Yii::t('app', 'Deleted'),
+        ];
+    }
+    
+    /**
+     * Returns map of available roles
+     * @return string[]
+     */
+    public static function getAvailableRoles()
+    {
+        return [
+            self::ROLE_USER => Yii::t('app', 'Normal User'),
+            self::ROLE_ADMIN => Yii::t('app', 'Admin'),
+        ];
+    }
 }

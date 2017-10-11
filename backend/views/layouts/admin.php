@@ -45,6 +45,10 @@ AppAsset::register($this);
                 'label' => Yii::t('menu', 'Modules'),
                 'items' => [
                     [
+                        'label' => Yii::t('menu', 'Users'),
+                        'url' => ['/user/index']
+                    ],
+                    [
                         'label' => Yii::t('menu', 'Articles'),
                         'url' => ['/articles/article/index']
                     ]

@@ -3,7 +3,7 @@
 namespace backend\controllers;
 
 use Yii;
-use backend\models\User;
+use common\models\User;
 use yii\data\ActiveDataProvider;
 use yii\web\Controller;
 use yii\web\NotFoundHttpException;
@@ -14,6 +14,11 @@ use yii\filters\VerbFilter;
  */
 class UserController extends Controller
 {
+    /**
+     * @var string
+     */
+    public $layout = '//admin';
+    
     /**
      * @inheritdoc
      */
@@ -70,6 +75,8 @@ class UserController extends Controller
         } else {
             return $this->render('create', [
                 'model' => $model,
+                'statuses' => User::getAvailableStatuses(),
+                'roles' => User::getAvailableRoles()
             ]);
         }
     }
@@ -89,6 +96,8 @@ class UserController extends Controller
         } else {
             return $this->render('update', [
                 'model' => $model,
+                'statuses' => User::getAvailableStatuses(),
+                'roles' => User::getAvailableRoles()
             ]);
         }
     }

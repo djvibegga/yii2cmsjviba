@@ -2,6 +2,7 @@
 
 use yii\helpers\Html;
 use yii\grid\GridView;
+use backend\modules\articles\models\Article;
 
 /* @var $this yii\web\View */
 /* @var $dataProvider yii\data\ActiveDataProvider */
@@ -20,9 +21,23 @@ $this->params['breadcrumbs'][] = $this->title;
         'dataProvider' => $dataProvider,
         'columns' => [
             'id',
-            'user_id',
+            [
+                'attribute' => 'user_id',
+                'label' => Yii::t('app', 'Author'),
+                'format' => 'raw',
+                'value' => function($model) {
+                    return Html::a($model->user->username, ['/user/view', 'id' => $model->user_id]);
+                }
+            ],
             'name',
-            'status',
+            [
+                'attribute' => 'status',
+                'label' => Yii::t('app', 'Status'),
+                'value' => function($model) {
+                    $statuses = Article::getAvailableStatuses();
+                    return empty($statuses[$model->status]) ? Yii::t('app', 'Undefined') : $statuses[$model->status];
+                }
+            ],
             'created_at',
             ['class' => 'yii\grid\ActionColumn'],
         ],
