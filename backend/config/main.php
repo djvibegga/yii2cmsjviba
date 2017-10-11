@@ -49,6 +49,9 @@ return [
                 ],
             ],
         ],
+        'photoManager' => [
+            'class' => 'common\components\PhotoManager'
+        ]
         /*
         'urlManager' => [
             'enablePrettyUrl' => true,

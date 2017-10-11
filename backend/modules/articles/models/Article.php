@@ -131,6 +131,38 @@ class Article extends \yii\db\ActiveRecord
     }
     
     /**
+     * {@inheritDoc}
+     * @see \yii\db\BaseActiveRecord::__set()
+     */
+    public function __set($name, $value)
+    {
+        if ($name == 'photo') {
+            $this->setPhoto($value);
+        } else {
+            parent::__set($name, $value);
+        }
+    }
+    
+    /**
+     * Sets photo attribute
+     * @param string|array $value photo data or photo data encoded via base64
+     * @return void
+     */
+    public function setPhoto($value)
+    {
+        if (is_string($value)) {
+            $this->setAttribute(
+                'photo',
+                empty($value) ? '{}' : base64_decode($value)
+            );
+        } elseif (is_array($value)) {
+            $this->setAttribute('photo', json_encode($value));
+        } else {
+            throw new \InvalidArgumentException('Value has bad format.');
+        }
+    }
+    
+    /**
      * Returns map of available statuses
      * @return string[]
      */

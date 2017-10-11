@@ -18,7 +18,7 @@ use yii\helpers\Url;
 
     <?= $form->field($model, 'status')->dropDownList($statuses) ?>
 
-    <?= $form->field($model, 'photo')->widget(\budyaga\cropper\Widget::className(), [
+    <?= $form->field($model, 'photo')->widget(common\components\photoField\Widget::className(), [
         'id' => 'articlePhotoUploader',
         'uploadUrl' => Url::to(['/articles/article/upload-photo'])
     ]) ?>

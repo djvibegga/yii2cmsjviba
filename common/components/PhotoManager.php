@@ -86,11 +86,15 @@ class PhotoManager extends Component
      * @param ActiveRecord $record    the photo record
      * @param string       $attribute attribute name
      * @param string       $format    photo format name
-     * @return string
+     * @return string|false
      */
     public function getPhotoUrl(ActiveRecord $record, $attribute, $format = 'origin')
     {
-        $relativePath = $this->getPhotoRelativePath($record, $attribute, $format);
+        try {
+            $relativePath = $this->getPhotoRelativePath($record, $attribute, $format);
+        } catch (\InvalidArgumentException $e) {
+            return false;
+        }
         return rtrim($record->storageBaseUrl) . '/' . ltrim($relativePath);
     }
     

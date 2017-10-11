@@ -37,7 +37,11 @@ $this->params['breadcrumbs'][] = $this->title;
             'created_at',
             'updated_at',
             'published_at',
-            'photo',
+            [
+                'label' => Yii::t('app', 'Photo'),
+                'format' => 'raw',
+                'value' => Html::img(Yii::$app->photoManager->getPhotoUrl($model, 'photo', 'small'))
+            ]
         ],
     ]) ?>
 

@@ -104,7 +104,7 @@ class UploadAction extends Action
                 if ($image->save($savePath)) {
                     $outputFormats = [];
                     foreach ($resizeConfig['formats'] as $format => $config) {
-                        list($width, $heigth) = $this->resolveThumbnailSize($image, $format, $config);
+                        list($width, $height) = $this->resolveThumbnailSize($image, $format, $config);
                         $img = Image::thumbnail($savePath, $width, $height);
                         $fileInfo = pathinfo($savePath);
                         $filePath = $fileInfo['dirname'] . DIRECTORY_SEPARATOR .

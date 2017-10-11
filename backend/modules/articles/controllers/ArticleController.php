@@ -83,14 +83,16 @@ class ArticleController extends Controller
     public function actionCreate()
     {
         $model = new Article();
-
-        if ($model->load(Yii::$app->request->post()) && $model->save()) {
+        $model->user_id = Yii::$app->user->getId();
+        $attributes = Yii::$app->request->post('Article');
+        $model->setAttributes($attributes);
+        
+        if ($model->save()) {
             return $this->redirect(['view', 'id' => $model->id]);
         } else {
-            $statuses = Article::getAvailableStatuses();
             return $this->render('create', [
                 'model' => $model,
-                'statuses' => $statuses
+                'statuses' => Article::getAvailableStatuses()
             ]);
         }
     }
@@ -110,6 +112,7 @@ class ArticleController extends Controller
         } else {
             return $this->render('update', [
                 'model' => $model,
+                'statuses' => Article::getAvailableStatuses()
             ]);
         }
     }
