@@ -3,7 +3,7 @@
 use yii\helpers\Html;
 use yii\widgets\ActiveForm;
 use yii\base\Widget;
-use app\components\AjaxPhotoUploader;
+use yii\helpers\Url;
 
 /* @var $this yii\web\View */
 /* @var $model app\modules\articles\models\Article */
@@ -18,8 +18,9 @@ use app\components\AjaxPhotoUploader;
 
     <?= $form->field($model, 'status')->dropDownList($statuses) ?>
 
-    <?= $form->field($model, 'photo')->widget(AjaxPhotoUploader::className(), [
-        'id' => 'articlePhotoUploader'
+    <?= $form->field($model, 'photo')->widget(\budyaga\cropper\Widget::className(), [
+        'id' => 'articlePhotoUploader',
+        'uploadUrl' => Url::to(['/articles/article/upload-photo'])
     ]) ?>
     
     <div class="form-group">

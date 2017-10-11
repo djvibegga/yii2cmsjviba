@@ -37,6 +37,18 @@ return [
         'errorHandler' => [
             'errorAction' => 'site/error',
         ],
+        'i18n' => [
+            'translations' => [
+                '*' => [
+                    'class' => 'yii\i18n\PhpMessageSource',
+                    'sourceLanguage' => 'en',
+                    'fileMap' => array(
+//                         'app' => 'app.php',
+//                         'menu' => 'menu.php'
+                    )
+                ],
+            ],
+        ],
         /*
         'urlManager' => [
             'enablePrettyUrl' => true,
@@ -45,6 +57,11 @@ return [
             ],
         ],
         */
+    ],
+    'modules' => [
+        'articles' => [
+            'class' => 'backend\modules\articles\Module',
+        ]
     ],
     'params' => $params,
 ];

@@ -1,13 +1,14 @@
 <?php
 
-namespace common\modules\articles\controllers;
+namespace backend\modules\articles\controllers;
 
 use Yii;
-use app\modules\articles\models\Article;
+use backend\modules\articles\models\Article;
 use yii\data\ActiveDataProvider;
 use yii\web\Controller;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
+use common\components\UploadAction;
 
 /**
  * ArticleController implements the CRUD actions for Article model.
@@ -30,6 +31,19 @@ class ArticleController extends Controller
                 'actions' => [
                     'delete' => ['POST'],
                 ],
+            ],
+        ];
+    }
+    
+    /**
+     * @inheritdoc
+     */
+    public function actions()
+    {
+        return [
+            'upload-photo' => [
+                'class' => UploadAction::className(),
+                'modelClass' => Article::className()
             ],
         ];
     }

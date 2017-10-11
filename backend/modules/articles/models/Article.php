@@ -1,11 +1,11 @@
 <?php
 
-namespace common\modules\articles\models;
+namespace backend\modules\articles\models;
 
 use Yii;
 use yii\behaviors\TimestampBehavior;
-use app\components\PhotoBehavior;
-use app\models\User;
+use common\components\PhotoBehavior;
+use common\models\User;
 
 /**
  * This is the model class for table "article".
@@ -56,8 +56,19 @@ class Article extends \yii\db\ActiveRecord
             'photos' => [
                 'class' => PhotoBehavior::className(),
                 'photoAttributes' => ['photo'],
-                'storageBasePath' => Yii::getAlias('@app/web') . '/upload/photos',
+                'storageBasePath' => Yii::getAlias('@backend/web') . '/upload/photos',
                 'storageBaseUrl' => '/upload/photos',
+                'formats' => [
+                    'small' => [
+                        'width' => 120
+                    ],
+                    'medium' => [
+                        'width' => 250
+                    ],
+                    'big' => [
+                        'width' => 400
+                    ]
+                ]
             ]
         ];
     }

@@ -26,6 +26,12 @@ use yii\behaviors\TimestampBehavior;
  */
 class User extends \yii\db\ActiveRecord implements IdentityInterface
 {
+    const ROLE_USER = 0;
+    const ROLE_ADMIN = 1;
+    
+    const STATUS_ACTIVE = 0;
+    const STATUS_DELETED = 1;
+    
     /**
      * @inheritdoc
      */
@@ -46,10 +52,10 @@ class User extends \yii\db\ActiveRecord implements IdentityInterface
                 'createdAtAttribute' => 'created_at',
                 'updatedAtAttribute' => 'updated_at',
                 'value' => function() {
-                return new \yii\db\Expression('NOW()');
+                    return new \yii\db\Expression('NOW()');
                 },
-                ]
-                ];
+            ]
+        ];
     }
     
     /**
@@ -58,13 +64,15 @@ class User extends \yii\db\ActiveRecord implements IdentityInterface
     public function rules()
     {
         return [
-            [['status', 'role'], 'integer'],
+            [['status'], 'integer'],
             [['email', 'auth_key', 'password_hash'], 'required'],
             [['created_at', 'updated_at'], 'safe'],
             [['email', 'username', 'password_hash', 'password_reset_token'], 'string', 'max' => 255],
             [['auth_key'], 'string', 'max' => 32],
             [['email'], 'unique'],
             [['password_reset_token'], 'unique'],
+            ['role', 'in', 'range' => [self::ROLE_USER, self::ROLE_ADMIN]],
+            ['status', 'in', 'range' => [self::STATUS_ACTIVE, self::STATUS_DELETED]]
         ];
     }
     

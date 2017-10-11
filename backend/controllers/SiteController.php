@@ -30,6 +30,11 @@ class SiteController extends Controller
                         'allow' => true,
                         'roles' => ['@'],
                     ],
+                    [
+                        'actions' => ['admin'],
+                        'allow' => true,
+                        'roles' => ['@']
+                    ]
                 ],
             ],
             'verbs' => [
@@ -61,6 +66,16 @@ class SiteController extends Controller
     public function actionIndex()
     {
         return $this->render('index');
+    }
+    
+    /**
+     * Displays admin homepage.
+     * @return string
+     */
+    public function actionAdmin()
+    {
+        $this->layout = 'admin';
+        return $this->render('admin');
     }
 
     /**
