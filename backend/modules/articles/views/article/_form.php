@@ -4,10 +4,13 @@ use yii\helpers\Html;
 use yii\widgets\ActiveForm;
 use yii\base\Widget;
 use yii\helpers\Url;
+use yii\bootstrap\Tabs;
+use backend\modules\articles\models\ArticleInfo;
 
 /* @var $this yii\web\View */
 /* @var $model app\modules\articles\models\Article */
 /* @var $form yii\widgets\ActiveForm */
+/* @var $langs array */
 ?>
 
 <div class="article-form">
@@ -22,6 +25,27 @@ use yii\helpers\Url;
         'id' => 'articlePhotoUploader',
         'uploadUrl' => Url::to(['/articles/article/upload-photo'])
     ]) ?>
+    
+    <?php
+        $tabItems = [];
+        foreach ($langs as $lang) {
+            $tabItems[] = [
+                'label' => $lang['label'],
+                'content' => $this->render('_form_info', [
+                    'lang' => $lang,
+                    'info' => new ArticleInfo(),
+                    'form' => $form,
+                    'model' => $model
+                ])
+            ];
+        }
+    ?>
+    
+    <?= Tabs::widget([
+        'items' => $tabItems
+    ]) ?>
+    
+    <br><br><br>
     
     <div class="form-group">
         <?= Html::submitButton($model->isNewRecord ? 'Create' : 'Update', ['class' => $model->isNewRecord ? 'btn btn-success' : 'btn btn-primary']) ?>

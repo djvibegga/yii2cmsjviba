@@ -9,6 +9,7 @@ use yii\web\Controller;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
 use common\components\UploadAction;
+use common\models\Language;
 
 /**
  * ArticleController implements the CRUD actions for Article model.
@@ -92,7 +93,8 @@ class ArticleController extends Controller
         } else {
             return $this->render('create', [
                 'model' => $model,
-                'statuses' => Article::getAvailableStatuses()
+                'statuses' => Article::getAvailableStatuses(),
+                'langs' => Language::find()->asArray()->all()
             ]);
         }
     }
@@ -112,7 +114,8 @@ class ArticleController extends Controller
         } else {
             return $this->render('update', [
                 'model' => $model,
-                'statuses' => Article::getAvailableStatuses()
+                'statuses' => Article::getAvailableStatuses(),
+                'langs' => Language::find()->asArray()->all(),
             ]);
         }
     }

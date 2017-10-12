@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
         "This file is @generated automatically"
     ],
-    "content-hash": "dcb1c2a0c1c5646e2dfef06742d6dcf2",
+    "content-hash": "115a885c2ddd898b48786a4a51b3ae15",
     "packages": [
         {
             "name": "bower-asset/bootstrap",
@@ -365,6 +365,49 @@
             "time": "2017-07-16T21:13:23+00:00"
         },
         {
+            "name": "comradepashka/yii2-tinymce",
+            "version": "0.0.3.6",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/ComradePashka/yii2-tinymce.git",
+                "reference": "4d7f575a1ff925c3f6ec42663ea084c74744cb2d"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/ComradePashka/yii2-tinymce/zipball/4d7f575a1ff925c3f6ec42663ea084c74744cb2d",
+                "reference": "4d7f575a1ff925c3f6ec42663ea084c74744cb2d",
+                "shasum": ""
+            },
+            "require": {
+                "tinymce/tinymce": "^4.3",
+                "yiisoft/yii2": "^2.0",
+                "yiisoft/yii2-bootstrap": "~2.0"
+            },
+            "type": "yii2-extension",
+            "autoload": {
+                "psr-4": {
+                    "comradepashka\\tinymce\\": ""
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "Apache-2.0"
+            ],
+            "authors": [
+                {
+                    "name": "Pavel Sokolov",
+                    "email": "comradepashka@gmail.com"
+                }
+            ],
+            "description": "TinyMCE widget with inline mode support",
+            "keywords": [
+                "extension",
+                "tinymce",
+                "yii2"
+            ],
+            "time": "2016-04-03T16:44:23+00:00"
+        },
+        {
             "name": "dmstr/yii2-migrate-command",
             "version": "0.3.1",
             "source": {
@@ -509,6 +552,91 @@
             "time": "2015-09-19T16:54:05+00:00"
         },
         {
+            "name": "moonlandsoft/helpers",
+            "version": "1.0.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/moonlandsoft/helpers.git",
+                "reference": "8a8c981b17112f04e1da0bd0de8d56adfb8e5adf"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/moonlandsoft/helpers/zipball/8a8c981b17112f04e1da0bd0de8d56adfb8e5adf",
+                "reference": "8a8c981b17112f04e1da0bd0de8d56adfb8e5adf",
+                "shasum": ""
+            },
+            "require": {
+                "yiisoft/yii2": "*"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "moonland\\helpers\\": ""
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Moh Khoirul Anam",
+                    "email": "moh.khoirul.anaam@gmail.com"
+                }
+            ],
+            "description": "Helper for all widgets",
+            "keywords": [
+                "extension",
+                "yii2"
+            ],
+            "time": "2015-01-23T14:45:15+00:00"
+        },
+        {
+            "name": "moonlandsoft/yii2-tinymce",
+            "version": "1.0.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/moonlandsoft/yii2-tinymce.git",
+                "reference": "3a3a3298696d53285cc7914a9878a4d4f24ae7b9"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/moonlandsoft/yii2-tinymce/zipball/3a3a3298696d53285cc7914a9878a4d4f24ae7b9",
+                "reference": "3a3a3298696d53285cc7914a9878a4d4f24ae7b9",
+                "shasum": ""
+            },
+            "require": {
+                "moonlandsoft/helpers": "*",
+                "yiisoft/yii2": "*"
+            },
+            "type": "yii2-extension",
+            "autoload": {
+                "psr-4": {
+                    "moonland\\tinymce\\": ""
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Moh Khoirul Anam",
+                    "email": "moh.khoirul.anaam@gmail.com"
+                }
+            ],
+            "description": "The TinyMCE Extension for yii framework",
+            "keywords": [
+                "editor",
+                "extension",
+                "text",
+                "tinymce",
+                "wyswyg",
+                "yii2"
+            ],
+            "time": "2015-01-24T04:45:03+00:00"
+        },
+        {
             "name": "swiftmailer/swiftmailer",
             "version": "v5.4.8",
             "source": {
@@ -561,6 +689,52 @@
                 "mailer"
             ],
             "time": "2017-05-01T15:54:03+00:00"
+        },
+        {
+            "name": "tinymce/tinymce",
+            "version": "4.7.1",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/tinymce/tinymce-dist.git",
+                "reference": "4fd91026d3765fee9b148b5e684b014a8e18ead1"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/tinymce/tinymce-dist/zipball/4fd91026d3765fee9b148b5e684b014a8e18ead1",
+                "reference": "4fd91026d3765fee9b148b5e684b014a8e18ead1",
+                "shasum": ""
+            },
+            "type": "component",
+            "extra": {
+                "component": {
+                    "scripts": [
+                        "tinymce.js",
+                        "plugins/*/plugin.js",
+                        "themes/*/theme.js"
+                    ],
+                    "files": [
+                        "tinymce.min.js",
+                        "plugins/*/plugin.min.js",
+                        "themes/*/theme.min.js",
+                        "skins/**"
+                    ]
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "LGPL-2.1"
+            ],
+            "description": "Web based JavaScript HTML WYSIWYG editor control.",
+            "homepage": "http://www.tinymce.com",
+            "keywords": [
+                "editor",
+                "html",
+                "javascript",
+                "richtext",
+                "tinymce",
+                "wysiwyg"
+            ],
+            "time": "2017-10-09T13:17:31+00:00"
         },
         {
             "name": "yiisoft/yii2",
