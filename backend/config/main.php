@@ -52,7 +52,11 @@ return [
         ],
         'photoManager' => [
             'class' => 'common\components\PhotoManager'
-        ]
+        ],
+        'assetManager' => [
+            'appendTimestamp' => YII_ENV == YII_ENV_PROD,
+            'bundles' => require(__DIR__ . '/' . (YII_ENV_PROD ? 'assets-prod.php' : 'assets-dev.php'))
+        ],
         /*
         'urlManager' => [
             'enablePrettyUrl' => true,
