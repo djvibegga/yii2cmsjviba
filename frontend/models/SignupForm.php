@@ -1,6 +1,7 @@
 <?php
 namespace frontend\models;
 
+use Yii;
 use yii\base\Model;
 use common\models\User;
 
@@ -41,6 +42,11 @@ class SignupForm extends Model
 
             ['password', 'required'],
             ['password', 'string', 'min' => 6],
+            
+            [
+                'confirmPassword', 'compare', 'compareAttribute' => 'password',
+                'message' => Yii::t('app', 'Password is confirmed incorrectly.')
+            ]
         ];
     }
 
@@ -60,6 +66,7 @@ class SignupForm extends Model
         $user->email = $this->email;
         $user->setPassword($this->password);
         $user->generateAuthKey();
+        $user->generateActivationCode();
         
         if ($user->save()) {
             if ($this->sendActivationEmail($user)) {
@@ -78,18 +85,20 @@ class SignupForm extends Model
      */
     protected function sendActivationEmail(User $user)
     {
-        Yii::$app->mailer
+        return Yii::$app->mailer
             ->compose(
                 [
-                    'html' => 'contact',
-                    'text' => 'contact-text'
+                    'html' => 'activateAccount',
+                    'text' => 'activateAccount-text'
                 ],
                 [
-                    'model' => $this
+                    'user' => $user
                 ]
             )
-            ->setTo($email)
-            ->setSubject('Новое письмо от пользователей')
+            ->setTo($this->email)
+            ->setSubject(
+                Yii::t('app', 'You was registered. Please activate your account.')
+            )
             ->send();
     }
 }

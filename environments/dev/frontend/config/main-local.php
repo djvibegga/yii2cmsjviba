@@ -3,8 +3,19 @@
 $config = [
     'components' => [
         'request' => [
-            // !!! insert a secret key in the following (if it is empty) - this is required by cookie validation
-            'cookieValidationKey' => '',
+            'cookieValidationKey' => 'Cabaiv3eCoo8sho9ohveePh0'
+        ],
+        'user' => [
+            'identityCookie' => [
+                'name' => '_identity',
+                'domain' => '.yii2cms.loc'
+            ],
+        ],
+        'session' => [
+            'name' => 'advanced-ui',
+            'cookieParams' => [
+                'domain' => '.yii2cms.loc'
+            ]
         ],
         'db' => [
             'class' => 'yii\db\Connection',

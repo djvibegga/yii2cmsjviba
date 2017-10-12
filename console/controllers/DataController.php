@@ -24,8 +24,9 @@ class DataController extends Controller
         $user = new User();
         $user->username = 'test user 1';
         $user->email = 'testuser1@gmail.com';
+        $user->generateAuthKey();
         $user->setPassword('testuser1');
-        $user->auth_key = 'abc';
+        $user->generateActivationCode();
         
         if ($user->save()) {
             Console::output('Test user has been created.');

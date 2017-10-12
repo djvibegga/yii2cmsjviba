@@ -4,12 +4,12 @@ use yii\helpers\Html;
 /* @var $this yii\web\View */
 /* @var $user common\models\User */
 
-$resetLink = Yii::$app->urlManager->createAbsoluteUrl(['site/activate-account', 'token' => $user->activation_code]);
+$activateLink = Yii::$app->urlManager->createAbsoluteUrl(['site/activate-account', 'code' => $user->activation_code]);
 ?>
-<div class="password-reset">
+<div class="activate-account">
     <p>Hello <?= Html::encode($user->username) ?>,</p>
 
-    <p>Follow the link below to reset your password:</p>
+    <p>Follow the link below to activate your account:</p>
 
-    <p><?= Html::a(Html::encode($resetLink), $resetLink) ?></p>
+    <p><?= Html::a(Html::encode($activateLink), $activateLink) ?></p>
 </div>
