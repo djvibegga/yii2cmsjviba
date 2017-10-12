@@ -12,7 +12,7 @@ class SignupForm extends Model
     public $username;
     public $email;
     public $password;
-
+    public $confirmPassword;
 
     /**
      * @inheritdoc
@@ -22,14 +22,22 @@ class SignupForm extends Model
         return [
             ['username', 'trim'],
             ['username', 'required'],
-            ['username', 'unique', 'targetClass' => '\common\models\User', 'message' => 'This username has already been taken.'],
+            [
+                'username', 'unique',
+                'targetClass' => '\common\models\User',
+                'message' => Yii::t('app', 'This username has already been taken.')
+            ],
             ['username', 'string', 'min' => 2, 'max' => 255],
 
             ['email', 'trim'],
             ['email', 'required'],
             ['email', 'email'],
             ['email', 'string', 'max' => 255],
-            ['email', 'unique', 'targetClass' => '\common\models\User', 'message' => 'This email address has already been taken.'],
+            [
+                'email', 'unique',
+                'targetClass' => '\common\models\User',
+                'message' => Yii::t('app', 'This email address has already been taken.')
+            ],
 
             ['password', 'required'],
             ['password', 'string', 'min' => 6],
@@ -53,6 +61,35 @@ class SignupForm extends Model
         $user->setPassword($this->password);
         $user->generateAuthKey();
         
-        return $user->save() ? $user : null;
+        if ($user->save()) {
+            if ($this->sendActivationEmail($user)) {
+                return $user;
+            } else {
+                $this->addError('email', Yii::t('app', 'Unable to send activation email.'));
+            }
+        }
+        return null;
+    }
+    
+    /**
+     * Sends an activation link to the newly registered user
+     * @param User $user the user record
+     * @return bool
+     */
+    protected function sendActivationEmail(User $user)
+    {
+        Yii::$app->mailer
+            ->compose(
+                [
+                    'html' => 'contact',
+                    'text' => 'contact-text'
+                ],
+                [
+                    'model' => $this
+                ]
+            )
+            ->setTo($email)
+            ->setSubject('Новое письмо от пользователей')
+            ->send();
     }
 }

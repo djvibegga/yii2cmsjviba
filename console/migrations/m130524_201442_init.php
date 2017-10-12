@@ -19,6 +19,7 @@ class m130524_201442_init extends Migration
             'updated_at' => $this->timestamp()->notNull(),
             'username' => $this->string()->defaultValue(null),
             'auth_key' => $this->string(32)->notNull(),
+            'activation_code' => $this->string(32)->notNull(),
             'password_hash' => $this->string()->notNull(),
             'password_reset_token' => $this->string()->unique(),
         ]);
