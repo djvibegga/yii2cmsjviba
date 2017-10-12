@@ -4,7 +4,9 @@ use yii\helpers\Html;
 /* @var $this yii\web\View */
 /* @var $user common\models\User */
 
-$activateLink = Yii::$app->urlManager->createAbsoluteUrl(['site/activate-account', 'code' => $user->activation_code]);
+$activateLink = Yii::$app->urlManager->createAbsoluteUrl(
+    ['site/activate-account', 'id' => $user->id, 'code' => $user->activation_code]
+);
 ?>
 <div class="activate-account">
     <p>Hello <?= Html::encode($user->username) ?>,</p>

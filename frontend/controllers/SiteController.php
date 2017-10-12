@@ -151,9 +151,7 @@ class SiteController extends Controller
         $model = new SignupForm();
         if ($model->load(Yii::$app->request->post())) {
             if ($user = $model->signup()) {
-                if (Yii::$app->getUser()->login($user)) {
-                    return $this->goHome();
-                }
+                return $this->render('signupSuccess', ['model' => $user]);
             }
         }
 
@@ -209,5 +207,31 @@ class SiteController extends Controller
         return $this->render('resetPassword', [
             'model' => $model,
         ]);
+    }
+    
+    /**
+     * Activates account if an activation code is valid
+     * @param int    $id
+     * @param string $code
+     * @return mixed
+     * @throws BadRequestHttpException
+     */
+    public function actionActivateAccount($id, $code)
+    {
+        if (! $user = \common\models\User::findOne($id)) {
+            throw new BadRequestHttpException('Invalid link.');
+        }
+        if ($user->status == \common\models\User::STATUS_ACTIVE) {
+            throw new BadRequestHttpException('User is already active.');
+        }
+        if ($user->activation_code != $code) {
+            throw new BadRequestHttpException('Activation code is invalid.');
+        }
+        $user->status = \common\models\User::STATUS_ACTIVE;
+        if ($user->save()) {
+            Yii::$app->user->login($user, 0);
+            return $this->goBack();
+        }
+        return $this->render('activationError', ['model' => $user]);
     }
 }

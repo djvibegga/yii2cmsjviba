@@ -61,20 +61,29 @@ class SignupForm extends Model
             return null;
         }
         
-        $user = new User();
-        $user->username = $this->username;
-        $user->email = $this->email;
-        $user->setPassword($this->password);
-        $user->generateAuthKey();
-        $user->generateActivationCode();
+        $transaction = Yii::$app->db->beginTransaction();
         
-        if ($user->save()) {
-            if ($this->sendActivationEmail($user)) {
-                return $user;
-            } else {
-                $this->addError('email', Yii::t('app', 'Unable to send activation email.'));
+        try {
+            $user = new User();
+            $user->username = $this->username;
+            $user->email = $this->email;
+            $user->setPassword($this->password);
+            $user->generateAuthKey();
+            $user->generateActivationCode();
+            
+            if ($user->save()) {
+                if ($this->sendActivationEmail($user)) {
+                    $transaction->commit();
+                    return $user;
+                } else {
+                    $this->addError('email', Yii::t('app', 'Unable to send activation email.'));
+                }
             }
+        } catch (\Exception $e) {
+            $this->addError('email', $e->getMessage());
+            Yii::error('Unable to register new user because of error: ' . $e->getMessage());
         }
+        $transaction->rollBack();
         return null;
     }
     
@@ -88,7 +97,7 @@ class SignupForm extends Model
         return Yii::$app->mailer
             ->compose(
                 [
-                    'html' => 'activateAccount',
+                    'html' => 'activateAccount-html',
                     'text' => 'activateAccount-text'
                 ],
                 [

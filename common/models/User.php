@@ -30,8 +30,9 @@ class User extends \yii\db\ActiveRecord implements IdentityInterface
     const ROLE_USER = 0;
     const ROLE_ADMIN = 1;
     
-    const STATUS_ACTIVE = 0;
-    const STATUS_DELETED = 1;
+    const STATUS_NOT_VERIFIED = 0;
+    const STATUS_ACTIVE = 1;
+    const STATUS_DELETED = 2;
     
     /**
      * @inheritdoc
@@ -73,7 +74,7 @@ class User extends \yii\db\ActiveRecord implements IdentityInterface
             [['email'], 'unique'],
             [['password_reset_token'], 'unique'],
             ['role', 'in', 'range' => [self::ROLE_USER, self::ROLE_ADMIN]],
-            ['status', 'in', 'range' => [self::STATUS_ACTIVE, self::STATUS_DELETED]]
+            ['status', 'in', 'range' => [self::STATUS_NOT_VERIFIED, self::STATUS_ACTIVE, self::STATUS_DELETED]]
         ];
     }
     
@@ -254,6 +255,7 @@ class User extends \yii\db\ActiveRecord implements IdentityInterface
     public static function getAvailableStatuses()
     {
         return [
+            self::STATUS_NOT_VERIFIED => Yii::t('app', 'Not Verified'),
             self::STATUS_ACTIVE => Yii::t('app', 'Active'),
             self::STATUS_DELETED => Yii::t('app', 'Deleted'),
         ];
