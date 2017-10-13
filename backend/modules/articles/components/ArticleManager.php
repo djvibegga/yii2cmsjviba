@@ -65,9 +65,12 @@ class ArticleManager extends \common\components\Component
             $existingInfos[$langs[$info->lang_id]] = $info;
         }
         foreach ($langs as $id => $name) {
-            $model->infos[$name] = $existingInfos[$name]->getAttributes(
-                ['title', 'teaser', 'text']
-            );
+            $infoAttributes = isset($existingInfos[$name])
+                ? $existingInfos[$name]->getAttributes(
+                      ['title', 'teaser', 'text']
+                  )
+                : [];
+            $model->infos[$name] = $infoAttributes;
         }
     }
     
@@ -177,7 +180,13 @@ class ArticleManager extends \common\components\Component
             }
             
             foreach ($model->infos as $lang => $infoAttributes) {
-                $articleInfo = $existingInfos[$lang];
+                if (isset($existingInfos[$lang])) {
+                    $articleInfo = $existingInfos[$lang];
+                } else {
+                    $articleInfo = new ArticleInfo();
+                    $articleInfo->lang_id = array_search($lang, $langs);
+                    $articleInfo->article_id = $article->id;
+                }
                 $articleInfo->attributes = $infoAttributes;
                 if (! $articleInfo->save()) {
                     $transaction->rollBack();

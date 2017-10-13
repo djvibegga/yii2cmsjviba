@@ -2,6 +2,8 @@
 
 namespace common\components;
 
+use Yii;
+use yii\base\Component;
 use yii\base\Action;
 use yii\base\DynamicModel;
 use yii\base\InvalidConfigException;
@@ -10,10 +12,6 @@ use yii\web\Response;
 use yii\web\UploadedFile;
 use budyaga\cropper\Widget;
 use yii\imagine\Image;
-use Imagine\Image\Box;
-use Yii;
-use Imagine\Image\ImagineInterface;
-use yii\base\Component;
 
 class UploadAction extends Action
 {
@@ -181,14 +179,32 @@ class UploadAction extends Action
         $origWidth = $size->getWidth();
         $origHeight = $size->getHeight();
         if (isset($config['width']) && !isset($config['height'])) {
-            $destWidth = $config['width'];
-            $destHeight = $destWidth / ($origWidth / $origHeight);
+            if ($config['width'] < $origWidth) {
+                $destWidth = $config['width'];
+                $destHeight = $destWidth / ($origWidth / $origHeight);
+            } else {
+                $destWidth = $origWidth;
+                $destHeight = $origHeight;
+            }
         } else if (!isset($config['width']) && isset($config['height'])) {
-            $destHeight = $config['height'];
-            $destWidth = $destHeight / ($origHeight / $origWidth);
-        } else {
-            $destHeight = $config['height'];
-            $destWidth = $config['width'];
+            if ($config['height'] < $origHeight) {
+                $destHeight = $config['height'];
+                $destWidth = $destHeight / ($origHeight / $origWidth);
+            } else {
+                $destHeight = $origHeight;
+                $destWidth = $origWidth;
+            }
+        } else if (isset($config['width']) && isset($config['height'])) {
+            if ($config['width'] < $origWidth) {
+                $destWidth = $config['width'];
+            } else {
+                $destWidth = $origWidth;
+            }
+            if ($config['height'] < $origHeight) {
+                $destHeight = $config['height'];
+            } else {
+                $destHeight = $origHeight;
+            }
         }
         return [$destWidth, $destHeight];
     }
