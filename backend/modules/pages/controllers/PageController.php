@@ -1,22 +1,21 @@
 <?php
 
-namespace backend\modules\articles\controllers;
+namespace backend\modules\pages\controllers;
 
 use Yii;
-use backend\modules\articles\models\Article;
 use yii\web\Controller;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
-use common\components\UploadAction;
 use common\models\Language;
-use backend\modules\articles\models\ArticleForm;
-use yii\web\BadRequestHttpException;
+use backend\modules\pages\models\Page;
+use backend\modules\pages\models\PageForm;
 use yii\base\InvalidParamException;
+use yii\web\BadRequestHttpException;
 
 /**
- * ArticleController implements the CRUD actions for Article model.
+ * PageController implements the CRUD actions for Page model.
  */
-class ArticleController extends Controller
+class PageController extends Controller
 {
     /**
      * @var string
@@ -37,118 +36,106 @@ class ArticleController extends Controller
             ],
         ];
     }
-    
-    /**
-     * @inheritdoc
-     */
-    public function actions()
-    {
-        return [
-            'upload-photo' => [
-                'class' => UploadAction::className(),
-                'modelClass' => Article::className()
-            ],
-        ];
-    }
 
     /**
-     * Lists all Article models.
+     * Lists all pages.
      * @return mixed
      */
     public function actionIndex()
     {
-        $dataProvider = $this->module->get('articleManager')->getDataProvider();
+        $dataProvider = $this->module->get('pageManager')->getDataProvider();
         return $this->render('index', [
-            'dataProvider' => $dataProvider,
+            'dataProvider' => $dataProvider
         ]);
     }
 
     /**
-     * Displays a single Article model.
-     * @param integer $id
+     * Displays a single page.
+     * @param integer $id the page id
      * @return mixed
      */
     public function actionView($id)
     {
         try {
-            $model = $this->module->get('articleManager')->loadArticleById($id);
+            $model = $this->module->get('pageManager')->loadPageById($id);
         } catch (\InvalidArgumentException $e) {
             throw new BadRequestHttpException();
         }
         if ($model === null) {
-            throw new NotFoundHttpException('Article has not found.');
+            throw new NotFoundHttpException('Page has not found.');
         }
         return $this->render('view', [
-            'model' => $model,
+            'model' => $model
         ]);
     }
 
     /**
-     * Creates a new article.
+     * Creates a new page.
      * If creation is successful, the browser will be redirected to the 'view' page.
      * @return mixed
      */
     public function actionCreate()
     {
-        $model = new ArticleForm(['scenario' => 'insert']);
+        $model = new PageForm(['scenario' => 'insert']);
         $model->load(Yii::$app->request->post());
-        $model->infos = Yii::$app->request->post('ArticleInfo');
+        $model->infos = Yii::$app->request->post('PageInfo');
         
-        if ($model->validate() && ($result = $this->module->get('articleManager')->createArticle($model))) {
-            if ($result instanceOf Article) {
+        if ($model->validate() && ($result = $this->module->get('pageManager')->createPage($model))) {
+            if ($result instanceOf Page) {
                 return $this->redirect(['view', 'id' => $result->id]);
             }
         }
         
         return $this->render('create', [
             'model' => $model,
-            'statuses' => Article::getAvailableStatuses(),
+            'statuses' => Page::getAvailableStatuses(),
             'langs' => Language::find()->asArray()->all()
         ]);
     }
 
     /**
-     * Updates an existing article.
+     * Updates an existing Page model.
      * If update is successful, the browser will be redirected to the 'view' page.
      * @param integer $id
      * @return mixed
      */
     public function actionUpdate($id)
     {
-        $model = new ArticleForm(['scenario' => 'update']);
-
+        $model = new PageForm(['scenario' => 'update']);
+        
         if (Yii::$app->request->getIsPost()) {
             $model->load(Yii::$app->request->post());
-            $model->infos = Yii::$app->request->post('ArticleInfo');
-            if ($result = $this->module->get('articleManager')->updateArticleById($id, $model)) {
+            $model->infos = Yii::$app->request->post('PageInfo');
+            if ($result = $this->module->get('pageManager')->updatePageById($id, $model)) {
                 return $this->redirect(['view', 'id' => $id]);
             }
         } else {
-            $this->module->get('articleManager')->loadArticleFormById($model, $id);
+            $this->module->get('pageManager')->loadPageFormById($model, $id);
         }
         
         return $this->render('update', [
             'model' => $model,
-            'statuses' => Article::getAvailableStatuses(),
+            'statuses' => Page::getAvailableStatuses(),
             'langs' => Language::find()->asArray()->all(),
         ]);
     }
 
     /**
-     * Deletes an existing article.
+     * Deletes an existing page.
      * If deletion is successful, the browser will be redirected to the 'index' page.
-     * @param integer $id
+     * @param integer $id the page id
      * @return mixed
      */
     public function actionDelete($id)
     {
         try {
-            $this->module->get('articleManager')->deleteArticleById($id);
+            $this->module->get('pageManager')->deletePageById($id);
         } catch (\InvalidArgumentException $e) {
             throw new BadRequestHttpException();
         } catch (InvalidParamException $e) {
-            throw new NotFoundHttpException('Article has not found.');
+            throw new NotFoundHttpException('Page has not found.');
         }
+
         return $this->redirect(['index']);
     }
 }

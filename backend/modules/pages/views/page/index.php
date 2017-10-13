@@ -2,20 +2,20 @@
 
 use yii\helpers\Html;
 use yii\grid\GridView;
-use backend\modules\articles\models\Article;
+use backend\modules\pages\models\Page;
 
 /* @var $this yii\web\View */
 /* @var $dataProvider yii\data\ActiveDataProvider */
 
-$this->title = 'Articles';
+$this->title = Yii::t('app', 'Pages');
 $this->params['breadcrumbs'][] = $this->title;
 ?>
-<div class="article-index">
+<div class="page-index">
 
     <h1><?= Html::encode($this->title) ?></h1>
 
     <p>
-        <?= Html::a('Create Article', ['create'], ['class' => 'btn btn-success']) ?>
+        <?= Html::a('Create Page', ['create'], ['class' => 'btn btn-success']) ?>
     </p>
     <?= GridView::widget([
         'dataProvider' => $dataProvider,
@@ -34,7 +34,7 @@ $this->params['breadcrumbs'][] = $this->title;
                 'attribute' => 'status',
                 'label' => Yii::t('app', 'Status'),
                 'value' => function($model) {
-                    $statuses = Article::getAvailableStatuses();
+                    $statuses = Page::getAvailableStatuses();
                     return empty($statuses[$model->status]) ? Yii::t('app', 'Undefined') : $statuses[$model->status];
                 }
             ],

@@ -85,7 +85,22 @@ class ArticleManager extends \common\components\Component
         if (! $article = $this->loadArticleById($articleId)) {
             throw new InvalidParamException('Article has not found.');
         }
-        return (bool)$article->delete();
+        
+        $transaction = Yii::$app->getDb()->beginTransaction();
+        try {
+            if ($article->delete()) {
+                ArticleInfo::deleteAll(['article_id' => $article->id]);
+                $transaction->commit();
+                return true;
+            }
+        } catch (\yii\db\Exception $e) {
+            Yii::error(
+                'Unable to delete the article. ID: ' . $article->id .
+                '. Cause is a db error: ' . $e->getMessage()
+            );
+        }
+        $transaction->rollBack();
+        return false;
     }
     
     /**

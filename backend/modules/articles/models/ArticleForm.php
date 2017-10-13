@@ -24,7 +24,7 @@ class ArticleForm extends Model
         parent::init();
         $articleInfo = new ArticleInfo();
         foreach (Language::getList() as $id => $name) {
-            $this->infos[$name] = $articleInfo->getAttributes(null, ['article_id']);
+            $this->infos[$name] = $articleInfo->getAttributes(null, ['article_id', 'lang_id']);
         }
     }
     

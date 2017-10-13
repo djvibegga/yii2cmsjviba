@@ -77,6 +77,14 @@ return [
                     'class' => 'backend\modules\articles\components\ArticleManager'
                 ]
             ]
+        ],
+        'pages' => [
+            'class' => 'backend\modules\pages\Module',
+            'components' => [
+                'pageManager' => [
+                    'class' => 'backend\modules\pages\components\PageManager'
+                ]
+            ]
         ]
     ],
     'params' => $params,

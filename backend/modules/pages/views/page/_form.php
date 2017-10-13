@@ -3,12 +3,11 @@
 use yii\helpers\Html;
 use yii\widgets\ActiveForm;
 use yii\base\Widget;
-use yii\helpers\Url;
 use yii\bootstrap\Tabs;
-use backend\modules\articles\models\ArticleInfo;
+use backend\modules\pages\models\PageInfo;
 
 /* @var $this yii\web\View */
-/* @var $model app\modules\articles\models\ArticleForm */
+/* @var $model app\modules\pages\models\PageForm */
 /* @var $form yii\widgets\ActiveForm */
 /* @var $langs array */
 ?>
@@ -21,15 +20,10 @@ use backend\modules\articles\models\ArticleInfo;
 
     <?= $form->field($model, 'status')->dropDownList($statuses) ?>
 
-    <?= $form->field($model, 'photo')->widget(common\components\photoField\Widget::className(), [
-        'id' => 'articlePhotoUploader',
-        'uploadUrl' => Url::to(['/articles/article/upload-photo'])
-    ]) ?>
-    
     <?php
         $tabItems = [];
         foreach ($langs as $lang) {
-            $infoModel = new ArticleInfo();
+            $infoModel = new PageInfo();
             $infoModel->attributes = isset($model->infos[$lang['name']])
                 ? $model->infos[$lang['name']] : [];
             $tabItems[] = [
