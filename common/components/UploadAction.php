@@ -19,8 +19,9 @@ class UploadAction extends Action
     public $uploadParam = 'file';
     public $maxSize = 2097152;
     public $extensions = 'jpeg, jpg, png, gif';
-    public $width = 200;
-    public $height = 200;
+    public $width = 300;
+    public $height = 300;
+    public $outputFormat = 'medium';
  
     /**
      * Returns resize parameters
@@ -129,7 +130,8 @@ class UploadAction extends Action
                     ];
                     $result = [
                         'filelink' => rtrim($resizeConfig['storageBaseUrl'], '/') .
-                            '/' . $saveFileName . '.' . $saveFileExtension,
+                            '/' . $saveFileName . '_' . $this->outputFormat .
+                            '.' . $saveFileExtension,
                         'result' => $resize
                     ];
                 } else {
