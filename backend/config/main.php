@@ -72,6 +72,11 @@ return [
     'modules' => [
         'articles' => [
             'class' => 'backend\modules\articles\Module',
+            'components' => [
+                'articleManager' => [
+                    'class' => 'backend\modules\articles\components\ArticleManager'
+                ]
+            ]
         ]
     ],
     'params' => $params,

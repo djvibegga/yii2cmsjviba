@@ -4,12 +4,14 @@ namespace backend\modules\articles\controllers;
 
 use Yii;
 use backend\modules\articles\models\Article;
-use yii\data\ActiveDataProvider;
 use yii\web\Controller;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
 use common\components\UploadAction;
 use common\models\Language;
+use backend\modules\articles\models\ArticleForm;
+use yii\web\BadRequestHttpException;
+use yii\base\InvalidParamException;
 
 /**
  * ArticleController implements the CRUD actions for Article model.
@@ -55,10 +57,7 @@ class ArticleController extends Controller
      */
     public function actionIndex()
     {
-        $dataProvider = new ActiveDataProvider([
-            'query' => Article::find(),
-        ]);
-
+        $dataProvider = $this->module->get('articleManager')->getDataProvider();
         return $this->render('index', [
             'dataProvider' => $dataProvider,
         ]);
@@ -71,53 +70,68 @@ class ArticleController extends Controller
      */
     public function actionView($id)
     {
+        try {
+            $model = $this->module->get('articleManager')->loadArticleById($id);
+        } catch (\InvalidArgumentException $e) {
+            throw new BadRequestHttpException();
+        }
+        if ($model === null) {
+            throw new NotFoundHttpException('Article has not found.');
+        }
         return $this->render('view', [
-            'model' => $this->findModel($id),
+            'model' => $model,
         ]);
     }
 
     /**
-     * Creates a new Article model.
+     * Creates a new article.
      * If creation is successful, the browser will be redirected to the 'view' page.
      * @return mixed
      */
     public function actionCreate()
     {
-        $model = new Article();
-        $model->user_id = Yii::$app->user->getId();
-        $attributes = Yii::$app->request->post('Article');
-        $model->setAttributes($attributes);
+        $model = new ArticleForm(['scenario' => 'insert']);
+        $model->load(Yii::$app->request->post());
+        $model->infos = Yii::$app->request->post('ArticleInfo');
         
-        if ($model->save()) {
-            return $this->redirect(['view', 'id' => $model->id]);
-        } else {
-            return $this->render('create', [
-                'model' => $model,
-                'statuses' => Article::getAvailableStatuses(),
-                'langs' => Language::find()->asArray()->all()
-            ]);
+        if ($model->validate() && ($result = $this->module->get('articleManager')->createArticle($model))) {
+            if ($result instanceOf Article) {
+                return $this->redirect(['view', 'id' => $result->id]);
+            }
         }
+        
+        return $this->render('create', [
+            'model' => $model,
+            'statuses' => Article::getAvailableStatuses(),
+            'langs' => Language::find()->asArray()->all()
+        ]);
     }
 
     /**
-     * Updates an existing Article model.
+     * Updates an existing article.
      * If update is successful, the browser will be redirected to the 'view' page.
      * @param integer $id
      * @return mixed
      */
     public function actionUpdate($id)
     {
-        $model = $this->findModel($id);
+        $model = new ArticleForm(['scenario' => 'update']);
 
-        if ($model->load(Yii::$app->request->post()) && $model->save()) {
-            return $this->redirect(['view', 'id' => $model->id]);
+        if (Yii::$app->request->getIsPost()) {
+            $model->load(Yii::$app->request->post());
+            $model->infos = Yii::$app->request->post('ArticleInfo');
+            if ($result = $this->module->get('articleManager')->updateArticleById($id, $model)) {
+                return $this->redirect(['view', 'id' => $id]);
+            }
         } else {
-            return $this->render('update', [
-                'model' => $model,
-                'statuses' => Article::getAvailableStatuses(),
-                'langs' => Language::find()->asArray()->all(),
-            ]);
+            $this->module->get('articleManager')->loadArticleFormById($model, $id);
         }
+        
+        return $this->render('update', [
+            'model' => $model,
+            'statuses' => Article::getAvailableStatuses(),
+            'langs' => Language::find()->asArray()->all(),
+        ]);
     }
 
     /**
@@ -128,24 +142,13 @@ class ArticleController extends Controller
      */
     public function actionDelete($id)
     {
-        $this->findModel($id)->delete();
-
-        return $this->redirect(['index']);
-    }
-
-    /**
-     * Finds the Article model based on its primary key value.
-     * If the model is not found, a 404 HTTP exception will be thrown.
-     * @param integer $id
-     * @return Article the loaded model
-     * @throws NotFoundHttpException if the model cannot be found
-     */
-    protected function findModel($id)
-    {
-        if (($model = Article::findOne($id)) !== null) {
-            return $model;
-        } else {
-            throw new NotFoundHttpException('The requested page does not exist.');
+        try {
+            $this->module->get('articleManager')->deleteArticleById($id);
+        } catch (\InvalidArgumentException $e) {
+            throw new BadRequestHttpException();
+        } catch (InvalidParamException $e) {
+            throw new NotFoundHttpException('Article has not found.');
         }
+        return $this->redirect(['index']);
     }
 }

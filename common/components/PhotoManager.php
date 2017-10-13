@@ -2,21 +2,21 @@
 
 namespace common\components;
 
-use yii\db\ActiveRecord;
+use yii\base\Model;
 
 class PhotoManager extends Component
 {
     /**
      * Checks whether attribute is declared
-     * @param ActiveRecord $record    the photo record
-     * @param string       $attribute the attribute name
+     * @param Model  $model    the photo model
+     * @param string $attribute the attribute name
      * @return bool
      */
-    public function isAttributeDeclared(ActiveRecord $record, $attribute)
+    public function isAttributeDeclared(Model $model, $attribute)
     {
-        $behaviors = $record->behaviors();
+        $behaviors = $model->behaviors();
         foreach ($behaviors as $id => $behavior) {
-            $behavior = $record->getBehavior($id);
+            $behavior = $model->getBehavior($id);
             if ($behavior instanceof PhotoBehavior && in_array($attribute, $behavior->photoAttributes)) {
                 return true;
             }
@@ -26,17 +26,17 @@ class PhotoManager extends Component
     
     /**
      * Returns photo property of given format
-     * @param ActiveRecord $record    the photo record
-     * @param string       $attribute attribute name
-     * @param string       $format    photo format name
+     * @param Model  $model     the photo model
+     * @param string $attribute attribute name
+     * @param string $format    photo format name
      * @return string photo property value
      */
-    public function getPhotoProperty(ActiveRecord $record, $attribute, $property, $format = 'origin')
+    public function getPhotoProperty(Model $model, $attribute, $property, $format = 'origin')
     {
-        if (!$this->isAttributeDeclared($record, $attribute)) {
+        if (!$this->isAttributeDeclared($model, $attribute)) {
             throw new \InvalidArgumentException('Attribute "' . $attribute . '" is undeclared as photo attribute.');
         }
-        $data = $record->getPhotoAttribute($attribute);
+        $data = $model->getPhotoAttribute($attribute);
         if ($format == 'origin') {
             if (isset($data[$property])) {
                 return $data[$property];
@@ -58,85 +58,85 @@ class PhotoManager extends Component
     
     /**
      * Returns photo file relative path of given format
-     * @param ActiveRecord $record the photo record
-     * @param string $attribute    attribute name
-     * @param string $format       photo format name
+     * @param Model  $model     the photo model
+     * @param string $attribute attribute name
+     * @param string $format    photo format name
      * @return string
      */
-    public function getPhotoRelativePath(ActiveRecord $record, $attribute, $format = 'origin')
+    public function getPhotoRelativePath(Model $model, $attribute, $format = 'origin')
     {
-        return $this->getPhotoProperty($record, $attribute, 'path', $format);
+        return $this->getPhotoProperty($model, $attribute, 'path', $format);
     }
     
     /**
      * Returns photo file absolute path of given format
-     * @param ActiveRecord $record    the photo record
-     * @param string       $attribute attribute name
-     * @param string       $format    photo format name
+     * @param Model  $model     the photo model
+     * @param string $attribute attribute name
+     * @param string $format    photo format name
      * @return string
      */
-    public function getPhotoAbsolutePath(ActiveRecord $record, $attribute, $format = 'origin')
+    public function getPhotoAbsolutePath(Model $model, $attribute, $format = 'origin')
     {
         $relativePath = $this->getPhotoRelativePath($attribute, $format);
-        return rtrim($record->storageBasePath) . '/' . ltrim($relativePath);
+        return rtrim($model->storageBasePath) . '/' . ltrim($relativePath);
     }
     
     /**
      * Returns photo file absolute path of given format
-     * @param ActiveRecord $record    the photo record
-     * @param string       $attribute attribute name
-     * @param string       $format    photo format name
+     * @param Model  $model     the photo model
+     * @param string $attribute attribute name
+     * @param string $format    photo format name
      * @return string|false
      */
-    public function getPhotoUrl(ActiveRecord $record, $attribute, $format = 'origin')
+    public function getPhotoUrl(Model $model, $attribute, $format = 'origin')
     {
         try {
-            $relativePath = $this->getPhotoRelativePath($record, $attribute, $format);
+            $relativePath = $this->getPhotoRelativePath($model, $attribute, $format);
         } catch (\InvalidArgumentException $e) {
             return false;
         }
-        return rtrim($record->storageBaseUrl) . '/' . ltrim($relativePath);
+        return rtrim($model->storageBaseUrl) . '/' . ltrim($relativePath);
     }
     
     /**
      * Returns photo size of given photo format
-     * @param ActiveRecord $record    the photo record
-     * @param string       $attribute photo attribute
-     * @param string       $format    photo format
+     * @param Model  $model     the photo model
+     * @param string $attribute photo attribute
+     * @param string $format    photo format
      * @return string photo size
      */
-    public function getPhotoSize(ActiveRecord $record, $attribute, $format = 'origin')
+    public function getPhotoSize(Model $model, $attribute, $format = 'origin')
     {
-        return $this->getPhotoProperty($record, $attribute, 'size', $format);
+        return $this->getPhotoProperty($model, $attribute, 'size', $format);
     }
     
     /**
      * Returns photo url of given format
-     * @param ActiveRecord $record    the photo record
-     * @param string       $attribute the attribute name
+     * @param Model  $model     the photo model
+     * @param string $attribute the attribute name
      * @return string
      */
-    public function getPhotoName(ActiveRecord $record, $attribute)
+    public function getPhotoName(Model $model, $attribute)
     {
-        if (!$this->isAttributeDeclared($record, $attribute)) {
+        if (!$this->isAttributeDeclared($model, $attribute)) {
             throw new \InvalidArgumentException('Attribute "' . $attribute . '" is undeclared as photo attribute.');
         }
-        $value = $record->$attribute;
+        $value = $model->$attribute;
         return $value['name'];
     }
     
     /**
      * Returns data creation of the photo
-     * @param ActiveRecord $record    the photo record
-     * @param string       $attribute the attribute name
+     * @param Model  $model     the photo model
+     * @param string $attribute the attribute name
      * @return string
      */
-    public function getCreatedAt(ActiveRecord $record, $attribute)
+    public function getCreatedAt(Model $model, $attribute)
     {
-        if (!$this->isAttributeDeclared($record, $attribute)) {
+        if (!$this->isAttributeDeclared($model, $attribute)) {
             throw new \InvalidArgumentException('Attribute "' . $attribute . '" is undeclared as photo attribute.');
         }
-        $value = $record->$attribute;
+        $value = $model->$attribute;
         return $value['created_at'];
     }
 }

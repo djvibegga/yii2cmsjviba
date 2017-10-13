@@ -125,7 +125,7 @@ class Article extends \yii\db\ActiveRecord
     /**
      * @return \yii\db\ActiveQuery
      */
-    public function getArticleInfos()
+    public function getInfos()
     {
         return $this->hasMany(ArticleInfo::className(), ['article_id' => 'id']);
     }
@@ -157,6 +157,8 @@ class Article extends \yii\db\ActiveRecord
             );
         } elseif (is_array($value)) {
             $this->setAttribute('photo', json_encode($value));
+        } else if ($value === null) {
+            $this->setAttribute('photo', '{}');
         } else {
             throw new \InvalidArgumentException('Value has bad format.');
         }

@@ -11,11 +11,11 @@ use comradepashka\tinymce\TinyMce;
 
 <div class="article-info-form">
 
-    <?= $form->field($info, 'title[' . $lang['name'] . ']')->textInput() ?>
+    <?= $form->field($info, '[' . $lang['name'] . ']title')->textInput() ?>
     
-    <?= $form->field($info, 'teaser[' . $lang['name'] . ']')->textArea() ?>
+    <?= $form->field($info, '[' . $lang['name'] . ']teaser')->textArea() ?>
     
-    <?= $form->field($info, 'text[' . $lang['name'] . ']')->widget(\moonland\tinymce\TinyMCE::className(), [
+    <?= $form->field($info, '[' . $lang['name'] . ']text')->widget(\moonland\tinymce\TinyMCE::className(), [
     ]) ?>
 
 </div>

@@ -51,7 +51,7 @@ class PhotoBehavior extends AttributeBehavior
     public function setPhotoAttribute($attribute, $value)
     {
         $owner = $this->owner;
-        $owner->setAttribute($attribute, json_encode($value));
+        $owner->$attribute = json_encode($value);
     }
     
     /**
@@ -63,7 +63,7 @@ class PhotoBehavior extends AttributeBehavior
     {
         $owner = $this->owner;
         if (!empty($owner->$attribute)) {
-            return json_decode($owner->getAttribute($attribute), true);
+            return json_decode($owner->$attribute, true);
         }
     }
 }

@@ -8,7 +8,7 @@ use yii\bootstrap\Tabs;
 use backend\modules\articles\models\ArticleInfo;
 
 /* @var $this yii\web\View */
-/* @var $model app\modules\articles\models\Article */
+/* @var $model app\modules\articles\models\ArticleForm */
 /* @var $form yii\widgets\ActiveForm */
 /* @var $langs array */
 ?>
@@ -29,11 +29,13 @@ use backend\modules\articles\models\ArticleInfo;
     <?php
         $tabItems = [];
         foreach ($langs as $lang) {
+            $infoModel = new ArticleInfo();
+            $infoModel->attributes = $model->infos[$lang['name']];
             $tabItems[] = [
                 'label' => $lang['label'],
                 'content' => $this->render('_form_info', [
                     'lang' => $lang,
-                    'info' => new ArticleInfo(),
+                    'info' => $infoModel,
                     'form' => $form,
                     'model' => $model
                 ])
@@ -48,7 +50,12 @@ use backend\modules\articles\models\ArticleInfo;
     <br><br><br>
     
     <div class="form-group">
-        <?= Html::submitButton($model->isNewRecord ? 'Create' : 'Update', ['class' => $model->isNewRecord ? 'btn btn-success' : 'btn btn-primary']) ?>
+        <?= Html::submitButton(
+            $model->getScenario() == 'insert' ? 'Create' : 'Update',
+            [
+                'class' => $model->getScenario() == 'insert' ? 'btn btn-success' : 'btn btn-primary'
+            ]
+        ) ?>
     </div>
 
     <?php ActiveForm::end(); ?>
