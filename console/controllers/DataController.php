@@ -8,6 +8,7 @@ use yii\helpers\Console;
 use yii\helpers\VarDumper;
 use common\models\User;
 use backend\modules\articles\models\Article;
+use app\models\ObjectSeo;
 
 class DataController extends Controller
 {
@@ -52,6 +53,31 @@ class DataController extends Controller
             ]);
             if ($article->save()) {
                 Console::output('Test article has been created.');
+                
+                $article->refresh();
+                
+                $objectSeo = new ObjectSeo();
+                $objectSeo->to_object_id = $article->object_id;
+                $objectSeo->lang_id = 1;
+                $objectSeo->url = 'testcategory1/article1';
+                $objectSeo->type = 'article';
+                if ($objectSeo->save()) {
+                    Console::output('Test object seo "en" has been created.');
+                } else {
+                    Console::output('Validation error: ' . VarDumper::dumpAsString($objectSeo->errors));
+                }
+                
+                $objectSeo = new ObjectSeo();
+                $objectSeo->to_object_id = $article->object_id;
+                $objectSeo->lang_id = 2;
+                $objectSeo->url = 'testcategory1/statya1';
+                $objectSeo->type = 'article';
+                if ($objectSeo->save()) {
+                    Console::output('Test object seo "ru" has been created.');
+                } else {
+                    Console::output('Validation error: ' . VarDumper::dumpAsString($objectSeo->errors));
+                }
+                
                 $transaction->commit();
             } else {
                 Console::output(
