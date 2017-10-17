@@ -6,6 +6,8 @@ use Yii;
 use yii\behaviors\TimestampBehavior;
 use common\components\PhotoBehavior;
 use common\models\User;
+use common\components\caching\ICacheableDataSource;
+use common\components\caching\CacheAdapterFactory;
 
 /**
  * This is the model class for table "article".
@@ -24,11 +26,45 @@ use common\models\User;
  * @property User $user
  * @property ArticleInfo[] $articleInfos
  */
-class Article extends \yii\db\ActiveRecord
+class Article extends \yii\db\ActiveRecord implements ICacheableDataSource
 {
     const STATUS_DRAFT = 0;
     const STATUS_PUBLISHED = 1;
     const STATUS_DELETED = 2;
+    
+    const DEFAULT_FETCH_BLOCK_SIZE = 256;
+    const DEFAULT_CACHE_TIME_TO_LIVE = 5184000; //24 hours in seconds
+    
+    /**
+     * The key value in {@link getCacheId()} gets prefixed by this or by it's class
+     * name if no prefix given.
+     * @var string
+     */
+    public $cacheIdPrefix;
+    
+    /**
+     * Cache component used
+     * @var string
+     */
+    public $cacheComponentName = 'memcache';
+    
+    /**
+     * Fetch records block size (used in pull method)
+     * @var integerhours
+     */
+    public $fetchBlockSize = self::DEFAULT_FETCH_BLOCK_SIZE;
+    
+    /**
+     * Cache life time duration
+     * @var integer
+     */
+    public $cacheLifeTime = self::DEFAULT_CACHE_TIME_TO_LIVE;
+    
+    /**
+     * Unique key field name
+     * @var string
+     */
+    public $uniqueKeyFieldName = array('url', 'lang_id');
     
     /**
      * @inheritdoc
@@ -151,10 +187,18 @@ class Article extends \yii\db\ActiveRecord
     public function setPhoto($value)
     {
         if (is_string($value)) {
-            $this->setAttribute(
-                'photo',
-                empty($value) ? '{}' : base64_decode($value)
-            );
+            $data = base64_encode(base64_decode($value));
+            if ($data === $value) {
+                $this->setAttribute(
+                    'photo',
+                    empty($value) ? '{}' : base64_decode($value)
+                );
+            } else {
+                $this->setAttribute(
+                    'photo',
+                    $value
+                );
+            }
         } elseif (is_array($value)) {
             $this->setAttribute('photo', json_encode($value));
         } else if ($value === null) {
@@ -162,6 +206,108 @@ class Article extends \yii\db\ActiveRecord
         } else {
             throw new \InvalidArgumentException('Value has bad format.');
         }
+    }
+    
+    /**
+     * {@inheritDoc}
+     * @see \common\components\caching\ICacheableDataSource::getCacheComponent()
+     */
+    public function getCacheComponent()
+    {
+        return Yii::$app->get($this->cacheComponentName);
+    }
+    
+    /**
+     * {@inheritDoc}
+     * @see \common\components\caching\ICacheableDataSource::getCacheId()
+     */
+    public function getCacheId($keyValue)
+    {
+        if (is_array($keyValue)) {
+            ksort($keyValue);
+            $keyValue = serialize($keyValue);
+        }
+        return isset($this->cacheIdPrefix)
+            ? $this->cacheIdPrefix . $keyValue
+            : get_class($this) . '_' . $keyValue;
+    }
+    
+    /**
+     * {@inheritDoc}
+     * @see \common\components\caching\ICacheableDataSource::getFetchBlockSize()
+     */
+    public function getFetchBlockSize()
+    {
+        return $this->fetchBlockSize;
+    }
+    
+    /**
+     * {@inheritDoc}
+     * @see \common\components\caching\ICacheableDataSource::getCacheLifeTime()
+     */
+    public function getCacheLifeTime()
+    {
+        return $this->cacheLifeTime;
+    }
+    
+    /**
+     * {@inheritDoc}
+     * @see \common\components\caching\ICacheableDataSource::getCacheTableName()
+     */
+    public function getCacheTableName()
+    {
+        return self::tableName();
+    }
+    
+    /**
+     * {@inheritDoc}
+     * @see \common\components\caching\ICacheableDataSource::getUniqueKeyField()
+     */
+    public function getUniqueKeyField()
+    {
+        return $this->uniqueKeyFieldName;
+    }
+    
+    /**
+     * {@inheritDoc}
+     * @see \common\components\caching\ICacheableDataSource::createAdapter()
+     */
+    public function createAdapter(CacheAdapterFactory $factory)
+    {
+        return $factory->create(CacheAdapterFactory::SQL_CACHE_ADAPTER);
+    }
+    
+    /**
+     * {@inheritDoc}
+     * @see \common\components\caching\ICacheableDataSource::buildCriteria()
+     */
+    public function buildCriteria(\yii\db\Query $query, $keyValue = null)
+    {
+        $uniqueKeyField = $this->getUniqueKeyField();
+        $query->select = array_merge(
+            $query->select,
+            [
+                '\'article\' as "type"',
+                '"t"."id"',
+                '"os".' . $uniqueKeyField[0],
+                '"os".' . $uniqueKeyField[1]
+            ]
+        );
+        $query->leftJoin('object_seo "os"', '"os".to_object_id = "t".object_id');
+        if ($keyValue !== null) {
+            foreach ($keyValue as $key => $value) {
+                $query->andFilterWhere(['"os"."' . $key . '"' => $value]);
+            }
+        }
+    }
+    
+    /**
+     * {@inheritDoc}
+     * @see \common\components\caching\ICacheableDataSource::getDbConnection()
+     */
+    public function getDbConnection()
+    {
+        return $this->getDb();
     }
     
     /**

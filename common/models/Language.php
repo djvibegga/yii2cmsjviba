@@ -51,7 +51,8 @@ class Language extends \yii\db\ActiveRecord
     /**
      * Returns map of languages. Keys are ids,
      * values are names
-     * @var array
+     * @return array
+     * @static
      * @todo: implement caching of languages
      */
     public static function getList()
@@ -61,5 +62,31 @@ class Language extends \yii\db\ActiveRecord
             $ret[$lang['id']] = $lang['name'];
         }
         return $ret;
+    }
+    
+    /**
+     * Returns language ID by given language name
+     * @param string $name language name
+     * @return mixed language ID, false if not found
+     * @static
+     */
+    public static function getIdByName($name)
+    {
+        return array_search($name, self::getList());
+    }
+    
+    /**
+     * Gets Language record attributes by the given ID
+     * @param integer $id ID of the language
+     * @return array Attributes found. Null if no such language found.
+     */
+    public static function findById($id)
+    {
+        $list = self::getList();
+        foreach ($list as $language) {
+            if ($language['id'] == $id) {
+                return $language;
+            }
+        }
     }
 }

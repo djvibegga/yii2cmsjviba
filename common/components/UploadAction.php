@@ -3,7 +3,6 @@
 namespace common\components;
 
 use Yii;
-use yii\base\Component;
 use yii\base\Action;
 use yii\base\DynamicModel;
 use yii\base\InvalidConfigException;

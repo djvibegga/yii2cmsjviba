@@ -8,6 +8,7 @@ $params = array_merge(
 
 return [
     'id' => 'app-backend',
+    'language' => 'en',
     'basePath' => dirname(__DIR__),
     'controllerNamespace' => 'backend\controllers',
     'bootstrap' => ['log'],
@@ -59,15 +60,33 @@ return [
         'assetManager' => [
             'appendTimestamp' => YII_ENV == YII_ENV_PROD,
             'bundles' => require(__DIR__ . '/' . (YII_ENV_PROD ? 'assets-prod.php' : 'assets-dev.php'))
-        ]
-        /*
+        ],
+        'modelFactory' => [
+            'class' => 'common\components\ModelFactory',
+            'classMap' => [
+                '\backend\modules\articles\models\Article' => '\backend\modules\articles\models\CustomArticle'
+            ]
+        ],
+        'cacheAdapterFactory' => [
+            'class' => 'common\components\caching\CacheAdapterFactory',
+            'cacheComponentName' => 'memcache'
+        ],
+        'memcache' => [
+            'class' => '\yii\caching\MemCache',
+            'servers' => [
+                [
+                    'host' => '127.0.0.1',
+                    'port' => 11211,
+                    'weight' => 100,
+                ],
+            ]
+        ],
         'urlManager' => [
             'enablePrettyUrl' => true,
             'showScriptName' => false,
-            'rules' => [
-            ],
+            'enableStrictParsing' => false,
+            'rules' => require __DIR__ . '/routes.php'
         ],
-        */
     ],
     'modules' => [
         'articles' => [

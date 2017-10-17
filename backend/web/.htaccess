@@ -1,0 +1,16 @@
+RedirectMatch 404 /\.git
+RedirectMatch 404 /\.ssh
+
+AddDefaultCharset UTF-8
+#IndexIgnore */*
+RewriteEngine on
+
+#php_value error_reporting 7
+#php_flag display_errors On
+
+# if a directory or a file exists, use it directly
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+
+# otherwise forward it to index.php
+RewriteRule . index.php

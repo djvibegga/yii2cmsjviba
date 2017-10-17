@@ -15,6 +15,7 @@ use common\components\MetaDataBehavior;
  * @property string  $teaser
  * @property string  $text
  * @property string  $meta
+ * @property string  $url
  *
  * @property Article $article
  */
@@ -38,6 +39,7 @@ class ArticleInfo extends \yii\db\ActiveRecord
             [['lang_id', 'article_id'], 'integer'],
             [['text', 'meta'], 'string'],
             [['title', 'teaser'], 'string', 'max' => 255],
+            ['url', 'string', 'max' => 255],
             [['title'], 'unique'],
             [
                 'article_id', 'exist',
@@ -72,6 +74,7 @@ class ArticleInfo extends \yii\db\ActiveRecord
             'teaser' => 'Teaser',
             'text' => 'Text',
             'meta' => 'Meta',
+            'url' => 'Url'
         ];
     }
 
