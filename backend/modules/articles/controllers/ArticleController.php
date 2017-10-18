@@ -103,7 +103,8 @@ class ArticleController extends Controller
         return $this->render('create', [
             'model' => $model,
             'statuses' => Article::getAvailableStatuses(),
-            'langs' => Language::find()->asArray()->all()
+            'langs' => Language::find()->asArray()->all(),
+            'allCategories' => $this->loadCategories()
         ]);
     }
 
@@ -143,6 +144,7 @@ class ArticleController extends Controller
             'model' => $model,
             'statuses' => Article::getAvailableStatuses(),
             'langs' => Language::find()->asArray()->all(),
+            'allCategories' => $this->loadCategories()
         ]);
     }
 
@@ -162,5 +164,23 @@ class ArticleController extends Controller
             throw new NotFoundHttpException('Article has not found.');
         }
         return $this->redirect(['index']);
+    }
+    
+    /**
+     * Loads article categories list and group
+     * into format needed especially for dropdown lists
+     * @return array
+     */
+    protected function loadCategories()
+    {
+        $dataProvider = $this->module->get('categoryManager')->getDataProvider();
+        $ret = [];
+        foreach ($dataProvider->query->activeOnly()->all() as $category) {
+            if ($category->depth == 0) {
+                continue;
+            }
+            $ret[$category->id] = $category->name;
+        }
+        return $ret;
     }
 }

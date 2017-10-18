@@ -55,6 +55,9 @@ class ArticleUrlRule extends ComponentUrlRuleWithCache
 
         $articleInfo = $model->getTranslatedInfo($langId);
         $categories = $model->categories;
+        if (empty($categories)) {
+            return false;
+        }
         $category = array_shift($categories);
         $url = $articleInfo ? $articleInfo->url : '';
         $categoryInfo = $category->getTranslatedInfo($langId);

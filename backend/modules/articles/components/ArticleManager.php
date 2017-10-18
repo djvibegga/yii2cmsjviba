@@ -59,6 +59,8 @@ class ArticleManager extends \common\components\Component
         }
         $model->setAttributes($article->attributes);
         $model->id = $articleId;
+        $model->categories = $article->getJsonAttributeAsArray('article_category_ids');
+        
         $langs = Language::getList();
         $existingInfos = [];
         foreach ($article->infos as $info) {
@@ -120,6 +122,10 @@ class ArticleManager extends \common\components\Component
         try {
             $article = new Article();
             $article->attributes = $form->attributes;
+            $article->setJsonAttributeFromArray(
+                'article_category_ids',
+                $model->categories
+            );
             $article->user_id = Yii::$app->user->getId();
             if (! $article->save()) {
                 $transaction->rollBack();
@@ -183,6 +189,10 @@ class ArticleManager extends \common\components\Component
         
         try {
             $article->attributes = $model->attributes;
+            $article->setJsonAttributeFromArray(
+                'article_category_ids',
+                $model->categories
+            );
             if (! $article->save()) {
                 $transaction->rollBack();
                 return [

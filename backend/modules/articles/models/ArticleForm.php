@@ -14,6 +14,7 @@ class ArticleForm extends Model
     public $status;
     public $photo;
     public $infos = [];
+    public $categories = [];
     
     /**
      * {@inheritDoc}
@@ -51,7 +52,7 @@ class ArticleForm extends Model
     {
         return [
             ['name', 'trim'],
-            ['name', 'required'],
+            [['name', 'categories'], 'required'],
             ['name', 'string', 'max' => 255],
             [
                 'name', 'unique',
@@ -61,6 +62,7 @@ class ArticleForm extends Model
             
             ['status', 'in', 'range' => array_keys(Article::getAvailableStatuses())],
             ['infos', 'each', 'rule' => ['safe']],
+            ['categories', 'each', 'rule' => ['integer']],
             ['photo', 'safe']
         ];
     }
@@ -72,8 +74,8 @@ class ArticleForm extends Model
     public function scenarios()
     {
         return [
-            'insert' => ['name', 'status', 'photo', 'infos'],
-            'update' => ['name', 'status', 'photo', 'infos']
+            'insert' => ['name', 'status', 'photo', 'infos', 'categories'],
+            'update' => ['name', 'status', 'photo', 'infos', 'categories']
         ];
     }
 }

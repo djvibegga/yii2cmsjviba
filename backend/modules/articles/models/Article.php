@@ -12,6 +12,7 @@ use common\components\TranslationBehavior;
 use common\CMS;
 use common\models\ObjectRecord;
 use common\interfaces\IHasSefUrl;
+use common\components\PgAttributeBehavior;
 
 /**
  * This is the model class for table "article".
@@ -38,6 +39,12 @@ class Article extends ObjectRecord implements IHasSefUrl, ICacheableDataSource
     
     const DEFAULT_FETCH_BLOCK_SIZE = 256;
     const DEFAULT_CACHE_TIME_TO_LIVE = 5184000; //24 hours in seconds
+    
+    /**
+     * Cache for related categories
+     * @var array
+     */
+    private $_categories;
     
     /**
      * The key value in {@link getCacheId()} gets prefixed by this or by it's class
@@ -110,11 +117,14 @@ class Article extends ObjectRecord implements IHasSefUrl, ICacheableDataSource
                     ]
                 ]
             ],
-            'translation' => array(
+            'translation' => [
                 'class' => TranslationBehavior::className(),
                 'modelClassName' => CMS::modelClass('\backend\modules\articles\models\ArticleInfo'),
                 'foreignKey' => 'article_id'
-            ),
+            ],
+            'pgjson' => [
+                'class' => PgAttributeBehavior::className()
+            ]
         ];
     }
 
@@ -173,11 +183,18 @@ class Article extends ObjectRecord implements IHasSefUrl, ICacheableDataSource
      */
     public function getCategories()
     {
-        $categoryIds = trim($this->article_category_ids, '{}');
-        if (empty($categoryIds)) {
-            return [];
+        if (!isset($this->_categories)) {
+            $categoryIds = trim($this->article_category_ids, '{}');
+            if (empty($categoryIds)) {
+                return [];
+            }
+            return $this->_categories = ArticleCategory::find()
+                ->andFilterWhere(['id' => explode(',', $categoryIds)])
+                ->leftJoin('unnest(\'{' . $categoryIds . '}\'::int[]) WITH ORDINALITY customorder("id",ord) USING ("id")')
+                ->orderBy('customorder.ord')
+                ->all();
         }
-        return ArticleCategory::findAll(['id' => explode(',', $categoryIds)]);
+        return $this->_categories;
     }
     
     /**

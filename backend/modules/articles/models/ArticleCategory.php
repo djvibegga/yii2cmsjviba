@@ -289,4 +289,12 @@ class ArticleCategory extends ObjectRecord implements IHasSefUrl, ICacheableData
 class ArticleCategoryQuery extends \yii\db\ActiveQuery
 {
     use NestedSetsQueryTrait;
+    
+    /**
+     * @return \backend\modules\articles\models\ArticleCategoryQuery
+     */
+    public function activeOnly()
+    {
+        return $this->andWhere(['status' => ArticleCategory::STATUS_ACTIVE]);
+    }
 }

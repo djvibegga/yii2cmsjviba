@@ -6,6 +6,7 @@ use yii\base\Widget;
 use yii\helpers\Url;
 use yii\bootstrap\Tabs;
 use backend\modules\articles\models\ArticleInfo;
+use kartik\select2\Select2;
 
 /* @var $this yii\web\View */
 /* @var $model app\modules\articles\models\ArticleForm */
@@ -20,6 +21,19 @@ use backend\modules\articles\models\ArticleInfo;
     <?= $form->field($model, 'name')->textInput(['maxlength' => true]) ?>
 
     <?= $form->field($model, 'status')->dropDownList($statuses) ?>
+    
+    <?= $form->field($model, 'categories')->widget(Select2::className(), [
+        'data' => $allCategories,
+        'language' => Yii::$app->language,
+        'maintainOrder' => true,
+        'options' => [
+            'placeholder' => Yii::t('app', 'Select categories...')
+        ],
+        'pluginOptions' => [
+            'multiple' => true,
+            'allowClear' => true
+        ],
+    ]) ?>
 
     <?= $form->field($model, 'photo')->widget(common\components\photoField\Widget::className(), [
         'id' => 'articlePhotoUploader',

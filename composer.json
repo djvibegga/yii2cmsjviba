@@ -21,7 +21,8 @@
         "budyaga/yii2-cropper": "*",
         "dmstr/yii2-migrate-command": "*",
         "moonlandsoft/yii2-tinymce": "*",
-        "paulzi/yii2-nested-sets": "^1.0"
+        "paulzi/yii2-nested-sets": "^1.0",
+        "kartik-v/yii2-widget-select2": "@dev"
     },
     "require-dev": {
         "yiisoft/yii2-debug": "~2.0.0",
