@@ -53,6 +53,10 @@ AppAsset::register($this);
                         'url' => ['/articles/article/index']
                     ],
                     [
+                        'label' => Yii::t('menu', 'Article Categories'),
+                        'url' => ['/articles/category/index']
+                    ],
+                    [
                         'label' => Yii::t('menu', 'Pages'),
                         'url' => ['/pages/page/index']
                     ]

@@ -4,37 +4,33 @@ namespace backend\modules\articles\models;
 
 use Yii;
 use yii\behaviors\TimestampBehavior;
-use common\components\PhotoBehavior;
-use common\models\User;
-use common\components\caching\ICacheableDataSource;
-use common\components\caching\CacheAdapterFactory;
+use paulzi\nestedsets\NestedSetsBehavior;
+use paulzi\nestedsets\NestedSetsQueryTrait;
 use common\components\TranslationBehavior;
 use common\CMS;
 use common\models\ObjectRecord;
 use common\interfaces\IHasSefUrl;
+use common\components\caching\CacheAdapterFactory;
+use common\components\caching\ICacheableDataSource;
 
 /**
- * This is the model class for table "article".
+ * This is the model class for table "article_category".
  *
  * @property integer $id
- * @property string  $article_category_ids
- * @property integer $user_id
+ * @property integer $tree
+ * @property integer $lft
+ * @property integer $rgt
+ * @property integer $depth
  * @property integer $object_id
- * @property string  $name
  * @property integer $status
- * @property string  $created_at
- * @property string  $updated_at
- * @property string  $published_at
- * @property string  $photo
- *
- * @property User $user
- * @property ArticleInfo[] $articleInfos
+ * @property string $created_at
+ * @property string $updated_at
+ * @property string $name
  */
-class Article extends ObjectRecord implements IHasSefUrl, ICacheableDataSource
+class ArticleCategory extends ObjectRecord implements IHasSefUrl, ICacheableDataSource
 {
-    const STATUS_DRAFT = 0;
-    const STATUS_PUBLISHED = 1;
-    const STATUS_DELETED = 2;
+    const STATUS_ACTIVE = 0;
+    const STATUS_DELETED = 1;
     
     const DEFAULT_FETCH_BLOCK_SIZE = 256;
     const DEFAULT_CACHE_TIME_TO_LIVE = 5184000; //24 hours in seconds
@@ -75,7 +71,7 @@ class Article extends ObjectRecord implements IHasSefUrl, ICacheableDataSource
      */
     public static function tableName()
     {
-        return 'article';
+        return 'article_category';
     }
     
     /**
@@ -93,28 +89,26 @@ class Article extends ObjectRecord implements IHasSefUrl, ICacheableDataSource
                     return new \yii\db\Expression('NOW()');
                 },
             ],
-            'photos' => [
-                'class' => PhotoBehavior::className(),
-                'photoAttributes' => ['photo'],
-                'storageBasePath' => Yii::getAlias('@backend/web') . '/upload/photos',
-                'storageBaseUrl' => '/upload/photos',
-                'formats' => [
-                    'small' => [
-                        'width' => 120
-                    ],
-                    'medium' => [
-                        'width' => 250
-                    ],
-                    'big' => [
-                        'width' => 400
-                    ]
-                ]
+            'nestedset' => [
+                'class' => NestedSetsBehavior::className(),
+                //'treeAttribute' => 'tree',
             ],
             'translation' => array(
                 'class' => TranslationBehavior::className(),
-                'modelClassName' => CMS::modelClass('\backend\modules\articles\models\ArticleInfo'),
-                'foreignKey' => 'article_id'
+                'modelClassName' => CMS::modelClass('\backend\modules\articles\models\ArticleCategoryInfo'),
+                'foreignKey' => 'article_category_id'
             ),
+        ];
+    }
+    
+    /**
+     * {@inheritDoc}
+     * @see \yii\db\ActiveRecord::transactions()
+     */
+    public function transactions()
+    {
+        return [
+            self::SCENARIO_DEFAULT => self::OP_ALL,
         ];
     }
 
@@ -124,19 +118,11 @@ class Article extends ObjectRecord implements IHasSefUrl, ICacheableDataSource
     public function rules()
     {
         return [
-            [['article_category_ids', 'photo'], 'string'],
-            [['user_id', 'name'], 'required'],
-            [['user_id', 'status'], 'integer'],
-            [['created_at', 'updated_at', 'published_at'], 'safe'],
-            [['name'], 'string', 'max' => 255],
-            [['name'], 'unique'],
-            [
-                ['user_id'],
-                'exist',
-                'skipOnError' => true,
-                'targetClass' => User::className(),
-                'targetAttribute' => ['user_id' => 'id']
-            ],
+            [['tree', 'lft', 'rgt', 'depth'], 'integer'],
+            [['name'], 'required'],
+            [['created_at', 'updated_at'], 'safe'],
+            [['name'], 'string', 'max' => 64],
+            ['status', 'in', 'range' => array_keys(self::getAvailableStatuses())]
         ];
     }
 
@@ -147,79 +133,16 @@ class Article extends ObjectRecord implements IHasSefUrl, ICacheableDataSource
     {
         return [
             'id' => 'ID',
-            'article_category_ids' => 'Article Category Ids',
-            'user_id' => 'User ID',
+            'tree' => 'Tree',
+            'lft' => 'Lft',
+            'rgt' => 'Rgt',
+            'depth' => 'Depth',
             'object_id' => 'Object ID',
-            'name' => 'Name',
             'status' => 'Status',
             'created_at' => 'Created At',
             'updated_at' => 'Updated At',
-            'published_at' => 'Published At',
-            'photo' => 'Photo',
+            'name' => 'Name',
         ];
-    }
-
-    /**
-     * @return \yii\db\ActiveQuery
-     */
-    public function getUser()
-    {
-        return $this->hasOne(User::className(), ['id' => 'user_id']);
-    }
-
-    /**
-     * List of assigned article categories
-     * @return ArticleCategory[]
-     */
-    public function getCategories()
-    {
-        $categoryIds = trim($this->article_category_ids, '{}');
-        if (empty($categoryIds)) {
-            return [];
-        }
-        return ArticleCategory::findAll(['id' => explode(',', $categoryIds)]);
-    }
-    
-    /**
-     * {@inheritDoc}
-     * @see \yii\db\BaseActiveRecord::__set()
-     */
-    public function __set($name, $value)
-    {
-        if ($name == 'photo') {
-            $this->setPhoto($value);
-        } else {
-            parent::__set($name, $value);
-        }
-    }
-    
-    /**
-     * Sets photo attribute
-     * @param string|array $value photo data or photo data encoded via base64
-     * @return void
-     */
-    public function setPhoto($value)
-    {
-        if (is_string($value)) {
-            $data = base64_encode(base64_decode($value));
-            if ($data === $value) {
-                $this->setAttribute(
-                    'photo',
-                    empty($value) ? '{}' : base64_decode($value)
-                );
-            } else {
-                $this->setAttribute(
-                    'photo',
-                    $value
-                );
-            }
-        } elseif (is_array($value)) {
-            $this->setAttribute('photo', json_encode($value));
-        } else if ($value === null) {
-            $this->setAttribute('photo', '{}');
-        } else {
-            throw new \InvalidArgumentException('Value has bad format.');
-        }
     }
     
     /**
@@ -228,7 +151,7 @@ class Article extends ObjectRecord implements IHasSefUrl, ICacheableDataSource
      */
     public function getUrlRuleClassName()
     {
-        return 'backend\modules\articles\components\ArticleUrlRule';
+        return 'backend\modules\articles\components\CategoryUrlRule';
     }
     
     /**
@@ -319,7 +242,7 @@ class Article extends ObjectRecord implements IHasSefUrl, ICacheableDataSource
         $query->select = array_merge(
             $query->select,
             [
-                '\'article\' as "type"',
+                '\'article_category\' as "type"',
                 '"t"."id"',
                 '"os".' . $uniqueKeyField[0],
                 '"os".' . $uniqueKeyField[1]
@@ -343,15 +266,27 @@ class Article extends ObjectRecord implements IHasSefUrl, ICacheableDataSource
     }
     
     /**
-     * Returns map of available statuses
+     * Returns available statuses map
      * @return string[]
      */
     public static function getAvailableStatuses()
     {
         return [
-            self::STATUS_DRAFT => Yii::t('app', 'Draft'),
-            self::STATUS_PUBLISHED => Yii::t('app', 'Published'),
-            self::STATUS_DELETED => Yii::t('app', 'Deleted'),
+            self::STATUS_ACTIVE => Yii::t('app', 'Active'),
+            self::STATUS_DELETED => Yii::t('app', 'Deleted')
         ];
     }
+    
+    /**
+     * @return \backend\modules\articles\models\ArticleCategoryQuery
+     */
+    public static function find()
+    {
+        return new ArticleCategoryQuery(get_called_class());
+    }
+}
+
+class ArticleCategoryQuery extends \yii\db\ActiveQuery
+{
+    use NestedSetsQueryTrait;
 }

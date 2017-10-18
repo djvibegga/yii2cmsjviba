@@ -9,9 +9,9 @@ use Yii;
  *
  * @property integer $id
  * @property integer $to_object_id
- * @property string $url
+ * @property string  $url
  * @property integer $lang_id
- * @property string $type
+ * @property string  $type
  */
 class ObjectSeo extends \yii\db\ActiveRecord
 {

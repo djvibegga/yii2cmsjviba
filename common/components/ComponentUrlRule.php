@@ -17,6 +17,8 @@ namespace common\components;
 use Yii;
 use common\models\Language;
 use common\CMS;
+use common\interfaces\IHasSefUrl;
+use yii\helpers\Inflector;
 
 /**
  * ComponentUrlRule is a base class for any custom URL manager rule which implements
@@ -350,8 +352,7 @@ abstract class ComponentUrlRule extends \yii\web\UrlRule
         }
         $text = mb_strtolower($text);
         if ($transliterate && $langName != 'en') {
-            $text = StringUtils::transliteration($text, $langName . '_en', false);
-            $text = rtrim($text, '-');
+            $text = rtrim(Inflector::transliterate($text));
         }
         $text = preg_replace('/[^a-z0-9]/u', '-', $text);
         return rtrim($text, '-');

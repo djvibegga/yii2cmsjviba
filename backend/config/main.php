@@ -64,7 +64,7 @@ return [
         'modelFactory' => [
             'class' => 'common\components\ModelFactory',
             'classMap' => [
-                '\backend\modules\articles\models\Article' => '\backend\modules\articles\models\CustomArticle'
+                
             ]
         ],
         'cacheAdapterFactory' => [
@@ -82,6 +82,7 @@ return [
             ]
         ],
         'urlManager' => [
+            'class' => 'common\components\UrlManager',
             'enablePrettyUrl' => true,
             'showScriptName' => false,
             'enableStrictParsing' => false,
@@ -94,6 +95,9 @@ return [
             'components' => [
                 'articleManager' => [
                     'class' => 'backend\modules\articles\components\ArticleManager'
+                ],
+                'categoryManager' => [
+                    'class' => 'backend\modules\articles\components\CategoryManager'
                 ]
             ]
         ],

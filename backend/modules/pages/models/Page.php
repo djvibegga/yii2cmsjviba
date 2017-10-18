@@ -5,6 +5,7 @@ namespace backend\modules\pages\models;
 use Yii;
 use common\models\User;
 use yii\behaviors\TimestampBehavior;
+use common\models\ObjectRecord;
 
 /**
  * This is the model class for table "page".
@@ -18,7 +19,7 @@ use yii\behaviors\TimestampBehavior;
  * @property string  $updated_at
  * @property string  $published_at
  */
-class Page extends \yii\db\ActiveRecord
+class Page extends ObjectRecord
 {
     const STATUS_DRAFT = 0;
     const STATUS_PUBLISHED = 1;

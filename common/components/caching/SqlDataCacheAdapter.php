@@ -129,7 +129,8 @@ class SqlDataCacheAdapter extends BaseDataCacheAdapter
     {
         $cacheId = $source->getCacheId($keyValue);
         $query = new \yii\db\Query();
-        $query->from = $source->getCacheTableName();
+        $query->select = [];
+        $query->from = ['"' . $source->getCacheTableName() . '" "t"'];
         $source->buildCriteria($query, $keyValue);
         if ($data = $query->createCommand($source->getDbConnection())->queryOne()) {
             $this->set($source, $data, $keyValue);

@@ -18,7 +18,7 @@ return [
         ],
         'migrate' => [
             'class' => 'dmstr\console\controllers\MigrateController'
-        ],
+        ]
     ],
     'components' => [
         'log' => [
@@ -29,6 +29,30 @@ return [
                 ],
             ],
         ],
+        'modelFactory' => [
+            'class' => 'common\components\ModelFactory'
+        ],
+        'urlManager' => [
+            'class' => 'common\components\UrlManager',
+            'enablePrettyUrl' => true,
+            'showScriptName' => false,
+            'enableStrictParsing' => false,
+            'rules' => require __DIR__ . '/../../backend/config/routes.php'
+        ],
+        'cacheAdapterFactory' => [
+            'class' => 'common\components\caching\CacheAdapterFactory',
+            'cacheComponentName' => 'memcache'
+        ],
+        'memcache' => [
+            'class' => '\yii\caching\MemCache',
+            'servers' => [
+                [
+                    'host' => '127.0.0.1',
+                    'port' => 11211,
+                    'weight' => 100,
+                ],
+            ]
+        ]
     ],
     'params' => $params,
 ];

@@ -16,12 +16,29 @@ class m130524_201443_init extends Migration
             'status' => $this->smallInteger()->notNull()->defaultValue(0),
             'created_at' => $this->timestamp()->notNull(),
             'updated_at' => $this->timestamp()->notNull(),
-            'name' => 'jsonb',
-            'description' => 'jsonb',
+            'name' => $this->string(64)->notNull()
         ]);
-
         $this->createIndex('lft', '{{%article_category}}', ['tree', 'lft', 'rgt']);
         $this->createIndex('rgt', '{{%article_category}}', ['tree', 'rgt']);
+        
+        $this->createTable('{{%article_category_info}}', [
+            'id' => $this->primaryKey(),
+            'article_category_id' => $this->integer()->notNull(),
+            'lang_id' => $this->integer()->notNull(),
+            'url' => $this->string(256)->notNull()
+        ]);
+        $this->createIndex(
+            'article_category_info_category_lang_idx',
+            '{{%article_category_info}}',
+            ['article_category_id', 'lang_id']
+        );
+        $this->addForeignKey(
+            'fk_article_category_info_category',
+            '{{%article_category_info}}',
+            'article_category_id',
+            'article_category',
+            'id'
+        );
 
         $this->createTable('{{%article}}', [
             'id' => $this->primaryKey(),
@@ -55,7 +72,7 @@ class m130524_201443_init extends Migration
 
     public function down()
     {
-        $this->dropIndex('fk_article_category_ids_idx', 'article');
+        $this->dropTable('{{%article_category_info}}');
         $this->dropTable('{{%article_category}}');
         $this->dropTable('{{%article_info}}');
         $this->dropTable('{{%article}}');

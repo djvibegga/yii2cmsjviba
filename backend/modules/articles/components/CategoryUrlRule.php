@@ -1,13 +1,14 @@
 <?php
 /**
- * ArticleUrlRule class
- * 
+ * CategoryUrlRule class
+ *
  * PHP version 5
- * 
+ *
  * @category   YII2-CMS
  * @package    Module.articles
  * @subpackage Module.articles.component
  * @author     Alexander Melyakov <melyakov@jviba.com>
+ * @author     Eugeniy Marilev <marilev@jviba.com>
  * @license    http://opensource.org/licenses/gpl-license.php GNU Public License
  * @link       https://jviba.com/display/PhpDoc/yii-cms
  */
@@ -20,28 +21,26 @@ use common\CMS;
 use common\models\Language;
 
 /**
- * ArticleUrlRule class is the SEF building and parsing URL-manager rule class for
- * entity "article".
- * 
+ * CategoryUrlRule class is the SEF building and parsing URL-manager rule class for
+ * entity "article category".
+ *
  * PHP version 5
  *
  * @category   YII2-CMS
  * @package    Module.articles
  * @subpackage Module.articles.component
  * @author     Alexander Melyakov <melyakov@jviba.com>
+ * @author     Eugeniy Marilev <marilev@jviba.com>
  * @license    http://opensource.org/licenses/gpl-license.php GNU Public License
  * @link       https://jviba.com/display/PhpDoc/yii-cms
  */
-class ArticleUrlRule extends ComponentUrlRuleWithCache
+class CategoryUrlRule extends ComponentUrlRuleWithCache
 {
-    const EXCEPTION_NOT_PUBLISHED = '{method}: given record has not published yet.';
-    const EXCEPTION_NO_PARENT_PUBLISHED = '{method}: parent of the given record has not published yet.';
-    
     /**
      * Default model class name
      * @var string
      */
-    public $modelClassName = '\backend\modules\articles\models\Article';
+    public $modelClassName = '\backend\modules\articles\models\ArticleCategory';
     
     /**
      * {@inheritDoc}
@@ -49,28 +48,20 @@ class ArticleUrlRule extends ComponentUrlRuleWithCache
      */
     public function getTemplateVars($record, $langId)
     {
-        $model = is_array($record)
-            ? CMS::model('\backend\modules\articles\models\Article', 'findOne', [$record['id']])
+        $record = is_array($record)
+            ? CMS::model('\backend\modules\articles\models\ArticleCategory', 'findOne', [$record['id']])
             : $record;
-
-        $articleInfo = $model->getTranslatedInfo($langId);
-        $categories = $model->categories;
-        $category = array_shift($categories);
-        $title = $articleInfo ? $articleInfo->title : '';
-        $categoryInfo = $category->getTranslatedInfo($langId);
-        if (empty($title)) {
-            return false;
-        }
+        
+        $categoryInfo = $record->getTranslatedInfo($langId);
         $language = Language::findById($langId);
         return array(
-            '{category}' => empty($categoryInfo) 
+            '{sefPart}' => empty($categoryInfo)
                 ? ''
                 : self::transformStringForUrl(
                     $categoryInfo->url,
                     true,
                     $language['name']
-               ),
-            '{sefPart}' => self::transformStringForUrl($title, true, $language['name']),
+                )
         );
     }
 }

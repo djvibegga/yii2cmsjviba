@@ -120,11 +120,23 @@ class ArticleController extends Controller
         if (Yii::$app->request->getIsPost()) {
             $model->load(Yii::$app->request->post());
             $model->infos = Yii::$app->request->post('ArticleInfo');
-            if ($result = $this->module->get('articleManager')->updateArticleById($id, $model)) {
-                return $this->redirect(['view', 'id' => $id]);
+            try {
+                if ($result = $this->module->get('articleManager')->updateArticleById($id, $model)) {
+                    return $this->redirect(['view', 'id' => $id]);
+                }
+            } catch (\InvalidArgumentException $e) {
+                throw new BadRequestHttpException();
+            } catch (InvalidParamException $e) {
+                throw new NotFoundHttpException($e->getMessage());
             }
         } else {
-            $this->module->get('articleManager')->loadArticleFormById($model, $id);
+            try {
+                $this->module->get('articleManager')->loadArticleFormById($model, $id);
+            } catch (\InvalidArgumentException $e) {
+                throw new BadRequestHttpException();
+            } catch (InvalidParamException $e) {
+                throw new NotFoundHttpException($e->getMessage());
+            }
         }
         
         return $this->render('update', [

@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
         "This file is @generated automatically"
     ],
-    "content-hash": "115a885c2ddd898b48786a4a51b3ae15",
+    "content-hash": "1819ac050650538870e2fe701dc0d3d0",
     "packages": [
         {
             "name": "bower-asset/bootstrap",
@@ -365,49 +365,6 @@
             "time": "2017-07-16T21:13:23+00:00"
         },
         {
-            "name": "comradepashka/yii2-tinymce",
-            "version": "0.0.3.6",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/ComradePashka/yii2-tinymce.git",
-                "reference": "4d7f575a1ff925c3f6ec42663ea084c74744cb2d"
-            },
-            "dist": {
-                "type": "zip",
-                "url": "https://api.github.com/repos/ComradePashka/yii2-tinymce/zipball/4d7f575a1ff925c3f6ec42663ea084c74744cb2d",
-                "reference": "4d7f575a1ff925c3f6ec42663ea084c74744cb2d",
-                "shasum": ""
-            },
-            "require": {
-                "tinymce/tinymce": "^4.3",
-                "yiisoft/yii2": "^2.0",
-                "yiisoft/yii2-bootstrap": "~2.0"
-            },
-            "type": "yii2-extension",
-            "autoload": {
-                "psr-4": {
-                    "comradepashka\\tinymce\\": ""
-                }
-            },
-            "notification-url": "https://packagist.org/downloads/",
-            "license": [
-                "Apache-2.0"
-            ],
-            "authors": [
-                {
-                    "name": "Pavel Sokolov",
-                    "email": "comradepashka@gmail.com"
-                }
-            ],
-            "description": "TinyMCE widget with inline mode support",
-            "keywords": [
-                "extension",
-                "tinymce",
-                "yii2"
-            ],
-            "time": "2016-04-03T16:44:23+00:00"
-        },
-        {
             "name": "dmstr/yii2-migrate-command",
             "version": "0.3.1",
             "source": {
@@ -637,6 +594,55 @@
             "time": "2015-01-24T04:45:03+00:00"
         },
         {
+            "name": "paulzi/yii2-nested-sets",
+            "version": "v1.0.6",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/paulzi/yii2-nested-sets.git",
+                "reference": "78d1aead3cc71005393657435f0234b277632db5"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/paulzi/yii2-nested-sets/zipball/78d1aead3cc71005393657435f0234b277632db5",
+                "reference": "78d1aead3cc71005393657435f0234b277632db5",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=5.4.0",
+                "yiisoft/yii2": "~2.0.0"
+            },
+            "require-dev": {
+                "phpunit/dbunit": "~1.0",
+                "phpunit/phpunit": "~4.0"
+            },
+            "type": "yii2-extension",
+            "autoload": {
+                "psr-4": {
+                    "paulzi\\nestedsets\\": ""
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Alexander Kochetov",
+                    "email": "creocoder@gmail.com"
+                },
+                {
+                    "name": "PaulZi",
+                    "email": "pavel.zimakoff@gmail.com"
+                }
+            ],
+            "description": "Nested Sets Behavior for Yii2",
+            "keywords": [
+                "nested sets",
+                "yii2"
+            ],
+            "time": "2016-10-13T22:34:19+00:00"
+        },
+        {
             "name": "swiftmailer/swiftmailer",
             "version": "v5.4.8",
             "source": {
@@ -689,52 +695,6 @@
                 "mailer"
             ],
             "time": "2017-05-01T15:54:03+00:00"
-        },
-        {
-            "name": "tinymce/tinymce",
-            "version": "4.7.1",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/tinymce/tinymce-dist.git",
-                "reference": "4fd91026d3765fee9b148b5e684b014a8e18ead1"
-            },
-            "dist": {
-                "type": "zip",
-                "url": "https://api.github.com/repos/tinymce/tinymce-dist/zipball/4fd91026d3765fee9b148b5e684b014a8e18ead1",
-                "reference": "4fd91026d3765fee9b148b5e684b014a8e18ead1",
-                "shasum": ""
-            },
-            "type": "component",
-            "extra": {
-                "component": {
-                    "scripts": [
-                        "tinymce.js",
-                        "plugins/*/plugin.js",
-                        "themes/*/theme.js"
-                    ],
-                    "files": [
-                        "tinymce.min.js",
-                        "plugins/*/plugin.min.js",
-                        "themes/*/theme.min.js",
-                        "skins/**"
-                    ]
-                }
-            },
-            "notification-url": "https://packagist.org/downloads/",
-            "license": [
-                "LGPL-2.1"
-            ],
-            "description": "Web based JavaScript HTML WYSIWYG editor control.",
-            "homepage": "http://www.tinymce.com",
-            "keywords": [
-                "editor",
-                "html",
-                "javascript",
-                "richtext",
-                "tinymce",
-                "wysiwyg"
-            ],
-            "time": "2017-10-09T13:17:31+00:00"
         },
         {
             "name": "yiisoft/yii2",
@@ -1246,6 +1206,49 @@
             ],
             "description": "BDD assertion library for PHPUnit",
             "time": "2017-01-09T10:58:51+00:00"
+        },
+        {
+            "name": "comradepashka/yii2-tinymce",
+            "version": "0.0.3.6",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/ComradePashka/yii2-tinymce.git",
+                "reference": "4d7f575a1ff925c3f6ec42663ea084c74744cb2d"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/ComradePashka/yii2-tinymce/zipball/4d7f575a1ff925c3f6ec42663ea084c74744cb2d",
+                "reference": "4d7f575a1ff925c3f6ec42663ea084c74744cb2d",
+                "shasum": ""
+            },
+            "require": {
+                "tinymce/tinymce": "^4.3",
+                "yiisoft/yii2": "^2.0",
+                "yiisoft/yii2-bootstrap": "~2.0"
+            },
+            "type": "yii2-extension",
+            "autoload": {
+                "psr-4": {
+                    "comradepashka\\tinymce\\": ""
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "Apache-2.0"
+            ],
+            "authors": [
+                {
+                    "name": "Pavel Sokolov",
+                    "email": "comradepashka@gmail.com"
+                }
+            ],
+            "description": "TinyMCE widget with inline mode support",
+            "keywords": [
+                "extension",
+                "tinymce",
+                "yii2"
+            ],
+            "time": "2016-04-03T16:44:23+00:00"
         },
         {
             "name": "doctrine/instantiator",
@@ -3456,6 +3459,52 @@
             ],
             "description": "A small library for converting tokenized PHP source code into XML and potentially other formats",
             "time": "2017-04-07T12:08:54+00:00"
+        },
+        {
+            "name": "tinymce/tinymce",
+            "version": "4.7.1",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/tinymce/tinymce-dist.git",
+                "reference": "4fd91026d3765fee9b148b5e684b014a8e18ead1"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/tinymce/tinymce-dist/zipball/4fd91026d3765fee9b148b5e684b014a8e18ead1",
+                "reference": "4fd91026d3765fee9b148b5e684b014a8e18ead1",
+                "shasum": ""
+            },
+            "type": "component",
+            "extra": {
+                "component": {
+                    "scripts": [
+                        "tinymce.js",
+                        "plugins/*/plugin.js",
+                        "themes/*/theme.js"
+                    ],
+                    "files": [
+                        "tinymce.min.js",
+                        "plugins/*/plugin.min.js",
+                        "themes/*/theme.min.js",
+                        "skins/**"
+                    ]
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "LGPL-2.1"
+            ],
+            "description": "Web based JavaScript HTML WYSIWYG editor control.",
+            "homepage": "http://www.tinymce.com",
+            "keywords": [
+                "editor",
+                "html",
+                "javascript",
+                "richtext",
+                "tinymce",
+                "wysiwyg"
+            ],
+            "time": "2017-10-09T13:17:31+00:00"
         },
         {
             "name": "webmozart/assert",

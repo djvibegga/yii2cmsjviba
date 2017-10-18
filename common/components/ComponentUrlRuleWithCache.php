@@ -224,7 +224,9 @@ abstract class ComponentUrlRuleWithCache extends ComponentUrlRule implements ICa
             $primaryNames = $this->resolvePrimaryParameterNames();
             foreach ($primaryNames as $param) {
                 if (isset($params[$param])) {
-                    $primaryParams[$param] = $params[$param];
+                    $primaryParams[$param] = is_numeric($params[$param])
+                        ? (int)$params[$param]
+                        : $params[$param];
                 }
             }
             $params = $primaryParams;

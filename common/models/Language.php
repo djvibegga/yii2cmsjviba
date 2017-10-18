@@ -82,11 +82,20 @@ class Language extends \yii\db\ActiveRecord
      */
     public static function findById($id)
     {
-        $list = self::getList();
+        $list = self::find()->asArray()->all();
         foreach ($list as $language) {
             if ($language['id'] == $id) {
                 return $language;
             }
         }
+    }
+    
+    /**
+     * Returns names of system languages
+     * @return array
+     */
+    public static function getNames()
+    {
+        return array_values(self::getList());
     }
 }

@@ -8,7 +8,10 @@ use yii\helpers\Console;
 use yii\helpers\VarDumper;
 use common\models\User;
 use backend\modules\articles\models\Article;
-use app\models\ObjectSeo;
+use backend\modules\articles\models\ArticleCategory;
+use backend\modules\articles\models\ArticleCategoryInfo;
+use common\models\Language;
+use backend\modules\articles\models\ArticleInfo;
 
 class DataController extends Controller
 {
@@ -31,9 +34,76 @@ class DataController extends Controller
         
         if ($user->save()) {
             Console::output('Test user has been created.');
+            
+            $rootCategory = new ArticleCategory();
+            $rootCategory->name = 'root';
+            if ($rootCategory->makeRoot()->save()) {
+                Console::output('Root article category has been created.');
+            } else {
+                Console::output(
+                    'Unable to create root article category because of errors: ' .
+                    VarDumper::dumpAsString($rootCategory->errors)
+                );
+            }
+            
+            $category = new ArticleCategory();
+            $category->name = 'category1.1';
+            if ($category->appendTo($rootCategory)->save()) {
+                $category->refresh();
+                
+                $categoryInfo = new ArticleCategoryInfo();
+                $categoryInfo->article_category_id = $category->id;
+                $categoryInfo->lang_id = Language::getIdByName('en');
+                $categoryInfo->url = 'categoryoneone';
+                if ($categoryInfo->save()) {
+                    $categoryInfo = new ArticleCategoryInfo();
+                    $categoryInfo->article_category_id = $category->id;
+                    $categoryInfo->lang_id = Language::getIdByName('ru');
+                    $categoryInfo->url = 'categoryodinodin';
+                    if ($categoryInfo->save()) {
+                        Console::output('Test article category has been created.');
+                    }
+                }
+                
+                $objectSeo = new \common\models\ObjectSeo();
+                $objectSeo->to_object_id = $category->object_id;
+                $objectSeo->lang_id = Language::getIdByName('en');
+                $objectSeo->url = 'categoryoneone';
+                $objectSeo->type = 'article_category';
+                if ($objectSeo->save()) {
+                    Console::output('Article category object seo "en" has been created.');
+                } else {
+                    Console::output('Validation error: ' . VarDumper::dumpAsString($objectSeo->errors));
+                    $transaction->rollBack();
+                    return;
+                }
+                
+                $objectSeo = new \common\models\ObjectSeo();
+                $objectSeo->to_object_id = $category->object_id;
+                $objectSeo->lang_id = Language::getIdByName('ru');
+                $objectSeo->url = 'categoryodinodin';
+                $objectSeo->type = 'article_category';
+                if ($objectSeo->save()) {
+                    Console::output('Article category object seo "ru" has been created.');
+                } else {
+                    Console::output('Validation error: ' . VarDumper::dumpAsString($objectSeo->errors));
+                    $transaction->rollBack();
+                    return;
+                }
+                
+            } else {
+                Console::output(
+                    'Unable to create test article category because of errors: ' .
+                    VarDumper::dumpAsString($category->errors)
+                );
+                $transaction->rollBack();
+                return;
+            }
+            
+            
             $article = new Article();
             $article->user_id = $user->id;
-            $article->article_category_ids = '{}';
+            $article->article_category_ids = '{' . $category->id . '}';
             $article->name = 'test article 1';
             $article->setPhotoAttribute('photo', [
                 'name' => 'Картинка 1.jpg',
@@ -52,30 +122,50 @@ class DataController extends Controller
                 ]
             ]);
             if ($article->save()) {
-                Console::output('Test article has been created.');
                 
                 $article->refresh();
                 
-                $objectSeo = new ObjectSeo();
+                $articleInfo = new ArticleInfo();
+                $articleInfo->title = 'article1';
+                $articleInfo->article_id = $article->id;
+                $articleInfo->lang_id = Language::getIdByName('en');
+                if ($articleInfo->save()) {
+                    $articleInfo = new ArticleInfo();
+                    $articleInfo->title = 'statya1';
+                    $articleInfo->article_id = $article->id;
+                    $articleInfo->lang_id = Language::getIdByName('ru');
+                    if ($articleInfo->save()) {
+                        Console::output('Test article has been created.');
+                    } else {
+                        $transaction->rollBack();
+                        return;
+                    }
+                }
+                
+                $objectSeo = new \common\models\ObjectSeo();
                 $objectSeo->to_object_id = $article->object_id;
                 $objectSeo->lang_id = 1;
-                $objectSeo->url = 'testcategory1/article1';
+                $objectSeo->url = 'categoryoneone/article1';
                 $objectSeo->type = 'article';
                 if ($objectSeo->save()) {
                     Console::output('Test object seo "en" has been created.');
                 } else {
                     Console::output('Validation error: ' . VarDumper::dumpAsString($objectSeo->errors));
+                    $transaction->rollBack();
+                    return;
                 }
                 
-                $objectSeo = new ObjectSeo();
+                $objectSeo = new \common\models\ObjectSeo();
                 $objectSeo->to_object_id = $article->object_id;
                 $objectSeo->lang_id = 2;
-                $objectSeo->url = 'testcategory1/statya1';
+                $objectSeo->url = 'categoryodinodin/statya1';
                 $objectSeo->type = 'article';
                 if ($objectSeo->save()) {
                     Console::output('Test object seo "ru" has been created.');
                 } else {
                     Console::output('Validation error: ' . VarDumper::dumpAsString($objectSeo->errors));
+                    $transaction->rollBack();
+                    return;
                 }
                 
                 $transaction->commit();
