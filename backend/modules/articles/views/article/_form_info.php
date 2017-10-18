@@ -13,6 +13,8 @@ use comradepashka\tinymce\TinyMce;
 
     <?= $form->field($info, '[' . $lang['name'] . ']title')->textInput() ?>
     
+    <?= $form->field($info, '[' . $lang['name'] . ']url')->textInput() ?>
+    
     <?= $form->field($info, '[' . $lang['name'] . ']teaser')->textArea() ?>
     
     <?= $form->field($info, '[' . $lang['name'] . ']text')->widget(\moonland\tinymce\TinyMCE::className(), [

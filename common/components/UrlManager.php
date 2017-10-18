@@ -102,37 +102,6 @@ class UrlManager extends \yii\web\UrlManager
     }
     
     /**
-     * Fixes bug with mailformed URL when parameter value is empty and urlFormat = path
-     *
-     * @param array  $params    list of GET parameters
-     * @param string $equal     the separator between name and value
-     * @param string $ampersand the separator between name-value pairs
-     * @param string $key       this is used internally.
-     *
-     * @return string path info
-     * @see CUrlManager::createPathInfo()
-     */
-//     public function createPathInfo($params, $equal, $ampersand, $key = null)
-//     {
-//         $pairs = array();
-//         foreach ($params as $k => $v) {
-//             if ($key !== null) {
-//                 $k = $key . '[' . $k . ']';
-//             }
-//             if (is_array($v)) {
-//                 if ($pair = $this->createPathInfo($v, $equal, $ampersand, $k)) {
-//                     $pairs[] = $pair;
-//                 }
-//             } else if ($this->urlFormat == 'path' && $v == '') {
-//                 continue;
-//             } else {
-//                 $pairs[] = urlencode($k) . $equal . urlencode($v);
-//             }
-//         }
-//         return implode($ampersand, $pairs);
-//     }
-    
-    /**
      * Resolves dependent entity class list by given affected entity
      *
      * @param string|object $affectedEntity entity which SEF url was affected
@@ -310,7 +279,6 @@ class UrlManager extends \yii\web\UrlManager
         $ruleClass = $record->getUrlRuleClassName();
         if ($rule = $this->getRuleByClassName($ruleClass)) {
             $languages = Language::getList();
-//             if ($force || $this->object->seo_recalc == self::SEO_RECALC_TRUE) {
             foreach ($languages as $langId => $langName) {
                 if (! $seo = $this->loadObjectSeo($record->object_id, $langId)) {
                     $seo = new ObjectSeo();

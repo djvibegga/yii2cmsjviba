@@ -50,39 +50,4 @@ class ObjectRecord extends \yii\db\ActiveRecord
         }
         parent::afterDelete();
     }
-    
-    /**
-     * Force change SEF url part for object.
-     * For all dependent entities SEF url should be recalculated
-     * @param string $url new SEF url part
-     * @return boolean whether operation success
-     */
-    public function changeSEFUrlPart($url)
-    {
-        $oldUrl = $this->url;
-        $this->url = $url;
-        if ($this->save()) {
-            $this->afterChangeSEFUrlPart($oldUrl, $url);
-            return true;
-        }
-        return false;
-    }
-
-    /**
-     * @param unknown $oldUrl
-     * @param unknown $newUrl
-     */
-    protected function afterChangeSEFUrlPart($oldUrl, $newUrl)
-    {
-        $sourceObject = $this->object;
-        $entityClassNames = Yii::$app->get('urlManager')
-            ->resolveDependentEntities($sourceObject->type);
-        $event = new \yii\base\Event(
-            $this,
-            compact('sourceObject', 'oldUrl', 'newUrl')
-        );
-        foreach ($entityClassNames as $className) {
-            CMS::model('new', $className)->onAfterChangeSEFUrlPart($event);
-        }
-    }
 }

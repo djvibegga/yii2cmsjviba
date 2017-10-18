@@ -56,9 +56,9 @@ class ArticleUrlRule extends ComponentUrlRuleWithCache
         $articleInfo = $model->getTranslatedInfo($langId);
         $categories = $model->categories;
         $category = array_shift($categories);
-        $title = $articleInfo ? $articleInfo->title : '';
+        $url = $articleInfo ? $articleInfo->url : '';
         $categoryInfo = $category->getTranslatedInfo($langId);
-        if (empty($title)) {
+        if (empty($url)) {
             return false;
         }
         $language = Language::findById($langId);
@@ -70,7 +70,7 @@ class ArticleUrlRule extends ComponentUrlRuleWithCache
                     true,
                     $language['name']
                ),
-            '{sefPart}' => self::transformStringForUrl($title, true, $language['name']),
+            '{sefPart}' => self::transformStringForUrl($url, true, $language['name']),
         );
     }
 }

@@ -67,7 +67,7 @@ class ArticleManager extends \common\components\Component
         foreach ($langs as $id => $name) {
             $infoAttributes = isset($existingInfos[$name])
                 ? $existingInfos[$name]->getAttributes(
-                      ['title', 'teaser', 'text']
+                      ['title', 'teaser', 'text', 'url']
                   )
                 : [];
             $model->infos[$name] = $infoAttributes;
