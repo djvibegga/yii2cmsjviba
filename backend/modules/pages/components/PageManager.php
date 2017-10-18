@@ -67,7 +67,7 @@ class PageManager extends \common\components\Component
         foreach ($langs as $id => $name) {
             $infoAttributes = isset($existingInfos[$name])
                 ? $existingInfos[$name]->getAttributes(
-                      ['title', 'teaser', 'text']
+                      ['title', 'url', 'teaser', 'text']
                   )
                 : [];
             $model->infos[$name] = $infoAttributes;

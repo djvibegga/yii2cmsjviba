@@ -24,7 +24,8 @@ class m130524_201444_init extends Migration
             'title' => $this->string()->notNull()->unique(),
             'teaser' => $this->string()->defaultValue(null),
             'text' => $this->text()->defaultValue(null),
-            'meta' => 'jsonb'
+            'meta' => 'jsonb',
+            'url' => $this->string(255)->notNull()->defaultValue('')
         ]);
     }
 

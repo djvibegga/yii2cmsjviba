@@ -237,9 +237,7 @@ class TranslationBehavior extends Behavior
     
     /**
      * Gets an information record which is translated to the given language.
-     *
      * @param integer|null $lang [optional] language ID. Null means any translations omitted.
-     *
      * @return CActiveRecord|null An information record or NULL, if couldn't find
      * any through the 'info' relation.
      */

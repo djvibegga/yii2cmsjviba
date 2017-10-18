@@ -14,5 +14,12 @@ return [
         'route' => 'articles/category/view',
         'template' => '{sefPart}',
         'cacheComponentName' => 'memcache'
-    ]
+    ],
+    [
+        'class' => 'backend\modules\pages\components\PageUrlRule',
+        'pattern' => 'pages/<name:[\w-]+>',
+        'route' => 'pages/page/view',
+        'template' => 'pages/{sefPart}',
+        'cacheComponentName' => 'memcache'
+    ],
 ];

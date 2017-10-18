@@ -15,6 +15,7 @@ use common\components\MetaDataBehavior;
  * @property string  $teaser
  * @property string  $text
  * @property string  $meta
+ * @property string  $url
  */
 class PageInfo extends \yii\db\ActiveRecord
 {
@@ -35,7 +36,7 @@ class PageInfo extends \yii\db\ActiveRecord
             [['lang_id', 'page_id', 'title'], 'required'],
             [['lang_id', 'page_id'], 'integer'],
             [['text', 'meta'], 'string'],
-            [['title', 'teaser'], 'string', 'max' => 255],
+            [['title', 'teaser', 'url'], 'string', 'max' => 255],
             [['title'], 'unique'],
         ];
     }

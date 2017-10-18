@@ -6,6 +6,11 @@ use Yii;
 use common\models\User;
 use yii\behaviors\TimestampBehavior;
 use common\models\ObjectRecord;
+use common\interfaces\IHasSefUrl;
+use common\components\caching\ICacheableDataSource;
+use common\components\TranslationBehavior;
+use common\CMS;
+use common\components\caching\CacheAdapterFactory;
 
 /**
  * This is the model class for table "page".
@@ -19,11 +24,45 @@ use common\models\ObjectRecord;
  * @property string  $updated_at
  * @property string  $published_at
  */
-class Page extends ObjectRecord
+class Page extends ObjectRecord implements IHasSefUrl, ICacheableDataSource
 {
     const STATUS_DRAFT = 0;
     const STATUS_PUBLISHED = 1;
     const STATUS_DELETED = 2;
+    
+    const DEFAULT_FETCH_BLOCK_SIZE = 256;
+    const DEFAULT_CACHE_TIME_TO_LIVE = 5184000; //24 hours in seconds
+    
+    /**
+     * The key value in {@link getCacheId()} gets prefixed by this or by it's class
+     * name if no prefix given.
+     * @var string
+     */
+    public $cacheIdPrefix;
+    
+    /**
+     * Cache component used
+     * @var string
+     */
+    public $cacheComponentName = 'memcache';
+    
+    /**
+     * Fetch records block size (used in pull method)
+     * @var integerhours
+     */
+    public $fetchBlockSize = self::DEFAULT_FETCH_BLOCK_SIZE;
+    
+    /**
+     * Cache life time duration
+     * @var integer
+     */
+    public $cacheLifeTime = self::DEFAULT_CACHE_TIME_TO_LIVE;
+    
+    /**
+     * Unique key field name
+     * @var string
+     */
+    public $uniqueKeyFieldName = array('url', 'lang_id');
     
     /**
      * @inheritdoc
@@ -62,7 +101,12 @@ class Page extends ObjectRecord
                 'value' => function() {
                     return new \yii\db\Expression('NOW()');
                 },
-            ]
+            ],
+            'translation' => [
+                'class' => TranslationBehavior::className(),
+                'modelClassName' => CMS::modelClass('\backend\modules\pages\models\PageInfo'),
+                'foreignKey' => 'page_id'
+            ],
         ];
     }
 
@@ -92,11 +136,123 @@ class Page extends ObjectRecord
     }
     
     /**
-     * @return \yii\db\ActiveQuery
+     * {@inheritDoc}
+     * @see \common\interfaces\IHasSefUrl::getUrlRuleClassName()
      */
-    public function getInfos()
+    public function getUrlRuleClassName()
     {
-        return $this->hasMany(PageInfo::className(), ['page_id' => 'id']);
+        return 'backend\modules\pages\components\PageUrlRule';
+    }
+    
+    /**
+     * {@inheritDoc}
+     * @see \common\interfaces\IHasSefUrl::getShouldRebuildSefUrl()
+     */
+    public function getShouldRebuildSefUrl()
+    {
+        return true;
+    }
+    
+    /**
+     * {@inheritDoc}
+     * @see \common\components\caching\ICacheableDataSource::getCacheComponent()
+     */
+    public function getCacheComponent()
+    {
+        return Yii::$app->get($this->cacheComponentName);
+    }
+    
+    /**
+     * {@inheritDoc}
+     * @see \common\components\caching\ICacheableDataSource::getCacheId()
+     */
+    public function getCacheId($keyValue)
+    {
+        if (is_array($keyValue)) {
+            ksort($keyValue);
+            $keyValue = serialize($keyValue);
+        }
+        return isset($this->cacheIdPrefix)
+            ? $this->cacheIdPrefix . $keyValue
+            : get_class($this) . '_' . $keyValue;
+    }
+    
+    /**
+     * {@inheritDoc}
+     * @see \common\components\caching\ICacheableDataSource::getFetchBlockSize()
+     */
+    public function getFetchBlockSize()
+    {
+        return $this->fetchBlockSize;
+    }
+    
+    /**
+     * {@inheritDoc}
+     * @see \common\components\caching\ICacheableDataSource::getCacheLifeTime()
+     */
+    public function getCacheLifeTime()
+    {
+        return $this->cacheLifeTime;
+    }
+    
+    /**
+     * {@inheritDoc}
+     * @see \common\components\caching\ICacheableDataSource::getCacheTableName()
+     */
+    public function getCacheTableName()
+    {
+        return self::tableName();
+    }
+    
+    /**
+     * {@inheritDoc}
+     * @see \common\components\caching\ICacheableDataSource::getUniqueKeyField()
+     */
+    public function getUniqueKeyField()
+    {
+        return $this->uniqueKeyFieldName;
+    }
+    
+    /**
+     * {@inheritDoc}
+     * @see \common\components\caching\ICacheableDataSource::createAdapter()
+     */
+    public function createAdapter(CacheAdapterFactory $factory)
+    {
+        return $factory->create(CacheAdapterFactory::SQL_CACHE_ADAPTER);
+    }
+    
+    /**
+     * {@inheritDoc}
+     * @see \common\components\caching\ICacheableDataSource::buildCriteria()
+     */
+    public function buildCriteria(\yii\db\Query $query, $keyValue = null)
+    {
+        $uniqueKeyField = $this->getUniqueKeyField();
+        $query->select = array_merge(
+            $query->select,
+            [
+                '\'' . self::tableName() . '\' as "type"',
+                '"t"."id"',
+                '"os".' . $uniqueKeyField[0],
+                '"os".' . $uniqueKeyField[1]
+            ]
+        );
+        $query->leftJoin('object_seo "os"', '"os".to_object_id = "t".object_id');
+        if ($keyValue !== null) {
+            foreach ($keyValue as $key => $value) {
+                $query->andFilterWhere(['"os"."' . $key . '"' => $value]);
+            }
+        }
+    }
+    
+    /**
+     * {@inheritDoc}
+     * @see \common\components\caching\ICacheableDataSource::getDbConnection()
+     */
+    public function getDbConnection()
+    {
+        return $this->getDb();
     }
     
     /**
