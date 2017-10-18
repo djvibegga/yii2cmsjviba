@@ -18,7 +18,30 @@ return [
         ],
         'migrate' => [
             'class' => 'dmstr\console\controllers\MigrateController'
-        ]
+        ],
+        'recache' => array(
+            'class' => 'console\controllers\RecacheController',
+            'sources' => array(
+                'backend\modules\articles\components\ArticleUrlRule' => [
+                    'pattern' => '<category:[\w-]+>/<name:[\w-]+>',
+                    'route' => 'articles/article/view',
+                    'template' => '{category}/{sefPart}',
+                    'cacheComponentName' => 'memcache'
+                ],
+                'backend\modules\articles\components\CategoryUrlRule' => [
+                    'pattern' => '<category:[\w-]+>',
+                    'route' => 'articles/category/view',
+                    'template' => '{sefPart}',
+                    'cacheComponentName' => 'memcache'
+                ],
+                'backend\modules\pages\components\PageUrlRule' => [
+                    'pattern' => 'pages/<name:[\w-]+>',
+                    'route' => 'pages/page/view',
+                    'template' => 'pages/{sefPart}',
+                    'cacheComponentName' => 'memcache'
+                ]
+            ),
+        ),
     ],
     'components' => [
         'log' => [

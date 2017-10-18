@@ -29,12 +29,10 @@ class SqlDataCacheAdapter extends BaseDataCacheAdapter
 {
     /**
      * Creates an instance of SqlDataCacheAdapter
-     * 
      * @return void
      */
     public function __construct()
     {
-        
     }
     
     /**
@@ -55,7 +53,8 @@ class SqlDataCacheAdapter extends BaseDataCacheAdapter
         Yii::trace('Executing pull of source: ' . get_class($source));
         $tableName = $source->getCacheTableName();
         $query = new \yii\db\Query();
-        $query->from = $tableName;
+        $query->select = [];
+        $query->from = ['"' . $tableName . '" "t"'];
         $source->buildCriteria($query, null);
         $query->offset = 0;
         $query->limit = $source->getFetchBlockSize();

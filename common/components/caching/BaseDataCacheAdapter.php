@@ -43,19 +43,17 @@ abstract class BaseDataCacheAdapter extends \common\components\Component impleme
     
     /**
      * Resolves key value depends on given data source, record.
-     * 
      * @param ICacheableDataSource $source   data source
      * @param array                $record   data record
      * @param mixed                $keyValue unique key value
-     * 
      * @return mixed unique key value
      */
     protected function resolveKeyValue(ICacheableDataSource $source, $record, $keyValue)
     {
         if ($keyValue === null) {
             $keyField = $source->getUniqueKeyField();
-            $keys = is_array($keyField) ? $keyField : array($keyField);
-            $keyValue = array();
+            $keys = is_array($keyField) ? $keyField : [$keyField];
+            $keyValue = [];
             foreach ($keys as $key) {
                 $keyValue[$key] = isset($record[$key]) ? $record[$key] : null;
             }
