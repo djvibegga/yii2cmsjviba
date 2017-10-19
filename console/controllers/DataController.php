@@ -128,7 +128,12 @@ class DataController extends Controller
                 $article->refresh();
                 
                 $articleInfo = new ArticleInfo();
-                $articleInfo->title = 'article1';
+                $articleInfo->url = $articleInfo->title = 'article1';
+                $articleInfo->setMetaFromArray('meta', [
+                    'title' => 'article1',
+                    'description' => 'article 1 descr',
+                    'keywords' => 'it,poetry,travelling'
+                ]);
                 $articleInfo->article_id = $article->id;
                 $articleInfo->lang_id = Language::getIdByName('en');
                 if ($articleInfo->save()) {
@@ -136,6 +141,11 @@ class DataController extends Controller
                     $articleInfo->title = 'statya1';
                     $articleInfo->article_id = $article->id;
                     $articleInfo->lang_id = Language::getIdByName('ru');
+                    $articleInfo->setMetaFromArray('meta', [
+                        'title' => 'статья1',
+                        'description' => 'описание статьи 1',
+                        'keywords' => 'ИТ,поезия,путешествия'
+                    ]);
                     if ($articleInfo->save()) {
                         Console::output('Test article has been created.');
                     } else {
@@ -187,12 +197,22 @@ class DataController extends Controller
                 $pageInfo->url = 'page1';
                 $pageInfo->page_id = $page->id;
                 $pageInfo->lang_id = Language::getIdByName('en');
+                $pageInfo->setMetaFromArray('meta', [
+                    'title' => 'page1',
+                    'description' => 'page 1 descr',
+                    'keywords' => 'it,poetry,music'
+                ]);
                 if ($pageInfo->save()) {
                     $pageInfo = new PageInfo();
                     $pageInfo->title = 'stranitsa1';
                     $pageInfo->url = 'stranitsa1';
                     $pageInfo->page_id = $page->id;
                     $pageInfo->lang_id = Language::getIdByName('ru');
+                    $pageInfo->setMetaFromArray('meta', [
+                        'title' => 'страница1',
+                        'description' => 'описание страницы 1',
+                        'keywords' => 'ИТ,поезия,музыка'
+                    ]);
                     if ($pageInfo->save()) {
                         Console::output('Test page has been created.');
                     } else {
@@ -202,7 +222,7 @@ class DataController extends Controller
                 }
                 
                 $objectSeo = new \common\models\ObjectSeo();
-                $objectSeo->to_object_id = $article->object_id;
+                $objectSeo->to_object_id = $page->object_id;
                 $objectSeo->lang_id = 1;
                 $objectSeo->url = 'pages/page1';
                 $objectSeo->type = 'page';
