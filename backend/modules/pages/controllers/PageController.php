@@ -64,6 +64,7 @@ class PageController extends Controller
         if ($model === null) {
             throw new NotFoundHttpException('Page has not found.');
         }
+        $this->layout = '//main';
         return $this->render('view', [
             'model' => $model
         ]);

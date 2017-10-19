@@ -12,6 +12,8 @@ use backend\modules\articles\models\ArticleCategory;
 use backend\modules\articles\models\ArticleCategoryInfo;
 use common\models\Language;
 use backend\modules\articles\models\ArticleInfo;
+use backend\modules\pages\models\Page;
+use backend\modules\pages\models\PageInfo;
 
 class DataController extends Controller
 {
@@ -167,14 +169,72 @@ class DataController extends Controller
                     $transaction->rollBack();
                     return;
                 }
-                
-                $transaction->commit();
             } else {
                 Console::output(
                     'Unable to create an article because of error: ' . VarDumper::dumpAsString($article->getErrors())
                 );
                 $transaction->rollBack();
             }
+            
+            $page = new Page();
+            $page->user_id = $user->id;
+            $page->name = 'test page 1';
+            if ($page->save()) {
+                $page->refresh();
+                
+                $pageInfo = new PageInfo();
+                $pageInfo->title = 'page1';
+                $pageInfo->url = 'page1';
+                $pageInfo->page_id = $page->id;
+                $pageInfo->lang_id = Language::getIdByName('en');
+                if ($pageInfo->save()) {
+                    $pageInfo = new PageInfo();
+                    $pageInfo->title = 'stranitsa1';
+                    $pageInfo->url = 'stranitsa1';
+                    $pageInfo->page_id = $page->id;
+                    $pageInfo->lang_id = Language::getIdByName('ru');
+                    if ($pageInfo->save()) {
+                        Console::output('Test page has been created.');
+                    } else {
+                        $transaction->rollBack();
+                        return;
+                    }
+                }
+                
+                $objectSeo = new \common\models\ObjectSeo();
+                $objectSeo->to_object_id = $article->object_id;
+                $objectSeo->lang_id = 1;
+                $objectSeo->url = 'pages/page1';
+                $objectSeo->type = 'page';
+                if ($objectSeo->save()) {
+                    Console::output('Test object seo "en" has been created.');
+                } else {
+                    Console::output('Validation error: ' . VarDumper::dumpAsString($objectSeo->errors));
+                    $transaction->rollBack();
+                    return;
+                }
+                
+                $objectSeo = new \common\models\ObjectSeo();
+                $objectSeo->to_object_id = $page->object_id;
+                $objectSeo->lang_id = 2;
+                $objectSeo->url = 'pages/stranitsa1';
+                $objectSeo->type = 'page';
+                if ($objectSeo->save()) {
+                    Console::output('Test object seo "ru" has been created.');
+                } else {
+                    Console::output('Validation error: ' . VarDumper::dumpAsString($objectSeo->errors));
+                    $transaction->rollBack();
+                    return;
+                }
+            } else {
+                Console::output(
+                    'Unable to create a page because of error: ' . VarDumper::dumpAsString($page->getErrors())
+                );
+                $transaction->rollBack();
+            }
+            
+            $transaction->commit();
+            
         } else {
             Console::output(
                 'Unable to create a user because of error: ' . VarDumper::dumpAsString($user->getErrors())

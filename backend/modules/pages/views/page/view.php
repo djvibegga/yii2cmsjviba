@@ -6,7 +6,11 @@ use yii\widgets\DetailView;
 /* @var $this yii\web\View */
 /* @var $model backend\modules\pages\models\Page */
 
-$this->title = $model->name;
+Yii::$app->metaData->setDataFromJsonMetaAttribute(
+    $model->getTranslatedInfo(Yii::$app->language),
+    'meta'
+);
+
 $this->params['breadcrumbs'][] = ['label' => Yii::t('app', 'Pages'), 'url' => ['index']];
 $this->params['breadcrumbs'][] = $this->title;
 ?>

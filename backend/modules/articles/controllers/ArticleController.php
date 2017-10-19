@@ -78,6 +78,7 @@ class ArticleController extends Controller
         if ($model === null) {
             throw new NotFoundHttpException('Article has not found.');
         }
+        $this->layout = '//main';
         return $this->render('view', [
             'model' => $model,
         ]);

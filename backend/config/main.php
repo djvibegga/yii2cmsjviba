@@ -88,6 +88,9 @@ return [
             'enableStrictParsing' => false,
             'rules' => require __DIR__ . '/routes.php'
         ],
+        'metaData' => [
+            'class' => 'common\components\MetaDataWidget'
+        ]
     ],
     'modules' => [
         'articles' => [
