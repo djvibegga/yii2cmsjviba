@@ -32,7 +32,20 @@ $this->params['breadcrumbs'][] = $this->title;
                 }
             ],
             'created_at',
-            ['class' => 'yii\grid\ActionColumn'],
+            [
+                'class' => 'yii\grid\ActionColumn',
+                'visibleButtons' => [
+                    'delete' => function($model) {
+                        return $model->depth != 0;
+                    },
+                    'update' => function($model) {
+                        return $model->depth != 0;
+                    },
+                    'view' => function($model) {
+                        return $model->depth != 0;
+                    },
+                ]
+            ],
         ],
     ]); ?>
 </div>

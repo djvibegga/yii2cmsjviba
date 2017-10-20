@@ -122,6 +122,7 @@ class ArticleCategory extends ObjectRecord implements IHasSefUrl, ICacheableData
             [['name'], 'required'],
             [['created_at', 'updated_at'], 'safe'],
             [['name'], 'string', 'max' => 64],
+            [['name'], 'unique'],
             ['status', 'in', 'range' => array_keys(self::getAvailableStatuses())]
         ];
     }

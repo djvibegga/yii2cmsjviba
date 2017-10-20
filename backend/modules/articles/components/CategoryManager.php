@@ -92,6 +92,9 @@ class CategoryManager extends \common\components\Component
         $transaction = Yii::$app->getDb()->beginTransaction();
         try {
             if ($category->delete()) {
+                $urlManager = Yii::$app->urlManager;
+                $urlManager->clearUrlCache($category);
+                $urlManager->deleteObjectSeoByObjectId($category->object_id);
                 ArticleCategoryInfo::deleteAll(['article_category_id' => $category->id]);
                 $transaction->commit();
                 return true;
@@ -127,9 +130,10 @@ class CategoryManager extends \common\components\Component
             if (! $category->appendTo($parentNode)->save()) {
                 $transaction->rollBack();
                 return [
-                    'ArticleCategory' => $newNode->getErrors()
+                    'ArticleCategory' => $category->getErrors()
                 ];
             }
+            
             foreach ($form->infos as $lang => $infoAttributes) {
                 $categoryInfo = new ArticleCategoryInfo();
                 $categoryInfo->attributes = $infoAttributes;
@@ -137,23 +141,23 @@ class CategoryManager extends \common\components\Component
                 if (($langId = array_search($lang, $langs)) === false) {
                     $transaction->rollBack();
                     return [
-                        'infos' => [
-                            $lang => [
-                                'lang_id' => 'Unknown language name.'
-                            ]
-                        ]
+                        'infos[' . $lang . '][lang_id]' => 'Unknown language name.'
                     ];
                 }
                 $categoryInfo->lang_id = $langId;
                 if (! $categoryInfo->save()) {
                     $transaction->rollBack();
-                    return [
-                        'infos' => [
-                            $lang => $categoryInfo->getErrors()
-                        ]
-                    ];
+                    $ret = [];
+                    foreach ($categoryInfo->getErrors() as $attr => $errors) {
+                        $ret['infos[' . $lang . '][' . $attr . ']'] = $errors;
+                    }
+                    return $ret;
                 }
             }
+            
+            $category->refresh();
+            Yii::$app->urlManager->buildSefUrl($category);
+            
         } catch (\yii\db\Exception $e) {
             Yii::error('Unable to create an article category because of db error: ' . $e->getMessage());
         }
@@ -196,6 +200,7 @@ class CategoryManager extends \common\components\Component
                     'ArticleCategory' => $category->getErrors()
                 ];
             }
+            
             $existingInfos = [];
             foreach ($category->infos as $categoryInfo) {
                 $existingInfos[$langs[$categoryInfo->lang_id]] = $categoryInfo;
@@ -212,13 +217,16 @@ class CategoryManager extends \common\components\Component
                 $categoryInfo->attributes = $infoAttributes;
                 if (! $categoryInfo->save()) {
                     $transaction->rollBack();
-                    return [
-                        'infos' => [
-                            $lang => $categoryInfo->getErrors()
-                        ]
-                    ];
+                    $ret = [];
+                    foreach ($categoryInfo->getErrors() as $attr => $errors) {
+                        $ret['infos[' . $lang . '][' . $attr . ']'] = $errors;
+                    }
+                    return $ret;
                 }
             }
+            
+            Yii::$app->urlManager->buildSefUrl($category);
+            
         } catch (\yii\db\Exception $e) {
             Yii::error('Unable to update the article category because of db error: ' . $e->getMessage());
         }

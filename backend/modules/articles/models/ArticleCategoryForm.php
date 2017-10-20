@@ -50,6 +50,11 @@ class ArticleCategoryForm extends Model
     {
         return [
             ['name', 'trim'],
+            [
+                'name', 'unique',
+                'targetClass' => ArticleCategory::className(),
+                'targetAttribute' => 'name'
+            ],
             [['name', 'parent_id'], 'required'],
             ['name', 'string', 'max' => 255],
             [

@@ -80,10 +80,13 @@ class PageController extends Controller
         $model = new PageForm(['scenario' => 'insert']);
         $model->load(Yii::$app->request->post());
         $model->infos = Yii::$app->request->post('PageInfo');
+        $model->meta = Yii::$app->request->post('MetaForm');
         
         if ($model->validate() && ($result = $this->module->get('pageManager')->createPage($model))) {
             if ($result instanceOf Page) {
                 return $this->redirect(['view', 'id' => $result->id]);
+            } else {
+                $model->addErrors($result);
             }
         }
         
@@ -107,8 +110,13 @@ class PageController extends Controller
         if (Yii::$app->request->getIsPost()) {
             $model->load(Yii::$app->request->post());
             $model->infos = Yii::$app->request->post('PageInfo');
-            if ($result = $this->module->get('pageManager')->updatePageById($id, $model)) {
+            $model->meta = Yii::$app->request->post('MetaForm');
+            if (($result = $this->module->get('pageManager')->updatePageById($id, $model)) &&
+                $result instanceOf Page
+            ) {
                 return $this->redirect(['view', 'id' => $id]);
+            } else {
+                $model->addErrors($result);
             }
         } else {
             $this->module->get('pageManager')->loadPageFormById($model, $id);

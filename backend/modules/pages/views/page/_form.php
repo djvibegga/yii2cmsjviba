@@ -5,6 +5,8 @@ use yii\widgets\ActiveForm;
 use yii\base\Widget;
 use yii\bootstrap\Tabs;
 use backend\modules\pages\models\PageInfo;
+use common\helpers\FormHelper;
+use common\models\MetaForm;
 
 /* @var $this yii\web\View */
 /* @var $model app\modules\pages\models\PageForm */
@@ -15,6 +17,8 @@ use backend\modules\pages\models\PageInfo;
 <div class="article-form">
 
     <?php $form = ActiveForm::begin(); ?>
+    
+    <h3><?= Yii::t('app', 'Attributes') ?></h3>
 
     <?= $form->field($model, 'name')->textInput(['maxlength' => true]) ?>
 
@@ -26,6 +30,9 @@ use backend\modules\pages\models\PageInfo;
             $infoModel = new PageInfo();
             $infoModel->attributes = isset($model->infos[$lang['name']])
                 ? $model->infos[$lang['name']] : [];
+            if ($infoErrors = FormHelper::getCustomErrors($model, 'infos', $lang['name'])) {
+                $infoModel->addErrors($infoErrors);
+            }
             $tabItems[] = [
                 'label' => $lang['label'],
                 'content' => $this->render('_form_info', [
@@ -37,6 +44,33 @@ use backend\modules\pages\models\PageInfo;
             ];
         }
     ?>
+    
+    <h3><?= Yii::t('app', 'Content') ?></h3>
+    
+    <?= Tabs::widget([
+        'items' => $tabItems
+    ]) ?>
+    
+    <?php
+        $tabItems = [];
+        foreach ($langs as $lang) {
+            $metaModel = new MetaForm();
+            $metaModel->attributes = isset($model->meta[$lang['name']])
+                ? $model->meta[$lang['name']]
+                : [];
+            $tabItems[] = [
+                'label' => $lang['label'],
+                'content' => $this->render('_form_meta', [
+                    'lang' => $lang,
+                    'meta' => $metaModel,
+                    'form' => $form,
+                    'model' => $model
+                ])
+            ];
+        }
+    ?>
+    
+    <h3><?= Yii::t('app', 'Meta') ?></h3>
     
     <?= Tabs::widget([
         'items' => $tabItems

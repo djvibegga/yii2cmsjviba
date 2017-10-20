@@ -4,6 +4,7 @@ use yii\helpers\Html;
 use yii\widgets\ActiveForm;
 use backend\modules\articles\models\ArticleCategoryInfo;
 use yii\bootstrap\Tabs;
+use common\helpers\FormHelper;
 
 /* @var $this yii\web\View */
 /* @var $model backend\modules\articles\models\ArticleCategory */
@@ -26,6 +27,9 @@ use yii\bootstrap\Tabs;
             $infoModel = new ArticleCategoryInfo();
             $infoModel->attributes = isset($model->infos[$lang['name']])
                 ? $model->infos[$lang['name']] : [];
+            if ($infoErrors = FormHelper::getCustomErrors($model, 'infos', $lang['name'])) {
+                $infoModel->addErrors($infoErrors);
+            }
             $tabItems[] = [
                 'label' => $lang['label'],
                 'content' => $this->render('_form_info', [

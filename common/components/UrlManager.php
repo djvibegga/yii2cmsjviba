@@ -21,6 +21,7 @@ use common\models\ObjectSeo;
 use yii\base\InvalidParamException;
 use common\interfaces\IHasSefUrl;
 use common\components\caching\ICacheableDataSource;
+use common\components\caching\CacheAdapterFactory;
 /**
  * UrlManager is the custom url manager component class
  * extended for system requirements.
@@ -291,7 +292,7 @@ class UrlManager extends \yii\web\UrlManager
                 $end = '-' . $i;
                 if ($seo->getIsNewRecord()) {
                     while (! $seo->save()) {
-                        break;
+                        break; //TODO: remove this line and check it in yii console
                         $seo->url = rtrim($seo->url, $end);
                         ++$i;
                         $end = '-' . $i;
@@ -299,7 +300,7 @@ class UrlManager extends \yii\web\UrlManager
                     }
                 } else {
                     while (! $seo->save(true, array('url'))) {
-                        break;
+                        break; //TODO: remove this line and check it in yii console
                         $seo->url = rtrim($seo->url, $end);
                         ++$i;
                         $end = '-' . $i;
@@ -353,9 +354,9 @@ class UrlManager extends \yii\web\UrlManager
             throw new InvalidParamException('Given record is not acceptable to clear url cache.');
         }
         if ($rule instanceof ICacheableDataSource) {
-            $factory = Yii::$app()->get('cacheAdapterFactory');
+            $factory = Yii::$app->get('cacheAdapterFactory');
             $adapter = $factory->create(CacheAdapterFactory::SQL_CACHE_ADAPTER);
-            $adapter->delete($rule, $this->getPrimaryKey());
+            $adapter->delete($rule, $record->getPrimaryKey());
         }
     }
 }

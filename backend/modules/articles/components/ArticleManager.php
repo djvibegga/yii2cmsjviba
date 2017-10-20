@@ -73,6 +73,14 @@ class ArticleManager extends \common\components\Component
                   )
                 : [];
             $model->infos[$name] = $infoAttributes;
+            
+            $model->meta[$name] = isset($existingInfos[$name])
+                ? $existingInfos[$name]->getMetaAsArray('meta')
+                : [
+                    'title' => '',
+                    'description' => '',
+                    'keywords'
+                ];
         }
     }
     
@@ -91,6 +99,9 @@ class ArticleManager extends \common\components\Component
         $transaction = Yii::$app->getDb()->beginTransaction();
         try {
             if ($article->delete()) {
+                $urlManager = Yii::$app->urlManager;
+                $urlManager->clearUrlCache($article);
+                $urlManager->deleteObjectSeoByObjectId($article->object_id);
                 ArticleInfo::deleteAll(['article_id' => $article->id]);
                 $transaction->commit();
                 return true;
@@ -124,7 +135,7 @@ class ArticleManager extends \common\components\Component
             $article->attributes = $form->attributes;
             $article->setJsonAttributeFromArray(
                 'article_category_ids',
-                $model->categories
+                $form->categories
             );
             $article->user_id = Yii::$app->user->getId();
             if (! $article->save()) {
@@ -133,30 +144,45 @@ class ArticleManager extends \common\components\Component
                     'Article' => $article->getErrors()
                 ];
             }
-            foreach ($form->infos as $lang => $infoAttributes) {
+            
+            foreach ($langs as $id => $name) {
+                if (! isset($form->infos[$name])) {
+                    continue;
+                }
+                $infoAttributes = $form->infos[$name];
                 $articleInfo = new ArticleInfo();
                 $articleInfo->attributes = $infoAttributes;
                 $articleInfo->article_id = $article->id;
-                if (($langId = array_search($lang, $langs)) === false) {
+                $articleInfo->setMetaFromArray(
+                    'meta',
+                    isset($form->meta[$name])
+                        ? $form->meta[$name]
+                        : [
+                            'title' => '',
+                            'description' => '',
+                            'keywords' => ''
+                        ]
+                );
+                if (($langId = array_search($name, $langs)) === false) {
                     $transaction->rollBack();
                     return [
-                        'infos' => [
-                            $lang => [
-                                'lang_id' => 'Unknown language name.'
-                            ]
-                        ]
+                        'infos[' . $name . '][lang_id]' => ['Unknown language name.']
                     ];
                 }
                 $articleInfo->lang_id = $langId;
                 if (! $articleInfo->save()) {
                     $transaction->rollBack();
-                    return [
-                        'infos' => [
-                            $lang => $articleInfo->getErrors()
-                        ]
-                    ];
+                    $ret = [];
+                    foreach ($articleInfo->getErrors() as $attr => $errors) {
+                        $ret['infos[' . $name . '][' . $attr . ']'] = $errors;
+                    }
+                    return $ret;
                 }
             }
+            
+            $article->refresh();
+            Yii::$app->urlManager->buildSefUrl($article);
+            
         } catch (\yii\db\Exception $e) {
             Yii::error('Unable to create an article because of db error: ' . $e->getMessage());
         }
@@ -199,29 +225,46 @@ class ArticleManager extends \common\components\Component
                     'Article' => $article->getErrors()
                 ];
             }
+            
             $existingInfos = [];
             foreach ($article->infos as $articleInfo) {
                 $existingInfos[$langs[$articleInfo->lang_id]] = $articleInfo;
             }
             
-            foreach ($model->infos as $lang => $infoAttributes) {
-                if (isset($existingInfos[$lang])) {
-                    $articleInfo = $existingInfos[$lang];
+            foreach ($langs as $id => $name) {
+                if (! isset($model->infos[$name])) {
+                    continue;
+                }
+                if (isset($existingInfos[$name])) {
+                    $articleInfo = $existingInfos[$name];
                 } else {
                     $articleInfo = new ArticleInfo();
-                    $articleInfo->lang_id = array_search($lang, $langs);
+                    $articleInfo->lang_id = array_search($name, $langs);
                     $articleInfo->article_id = $article->id;
                 }
-                $articleInfo->attributes = $infoAttributes;
+                $articleInfo->attributes = $model->infos[$name];
+                $articleInfo->setMetaFromArray(
+                    'meta',
+                    isset($model->meta[$name])
+                        ? $model->meta[$name]
+                        : [
+                            'title' => '',
+                            'description' => '',
+                            'keywords' => ''
+                        ]
+                );
                 if (! $articleInfo->save()) {
                     $transaction->rollBack();
-                    return [
-                        'infos' => [
-                            $lang => $articleInfo->getErrors()
-                        ]
-                    ];
+                    $ret = [];
+                    foreach ($articleInfo->getErrors() as $attr => $errors) {
+                        $ret['infos[' . $name . '][' . $attr . ']'] = $errors;
+                    }
+                    return $ret;
                 }
             }
+            
+            Yii::$app->urlManager->buildSefUrl($article);
+            
         } catch (\yii\db\Exception $e) {
             Yii::error('Unable to update the article because of db error: ' . $e->getMessage());
         }

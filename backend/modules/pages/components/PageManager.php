@@ -9,6 +9,7 @@ use backend\modules\pages\models\PageInfo;
 use common\models\Language;
 use yii\data\ActiveDataProvider;
 use yii\base\InvalidParamException;
+use common\models\ObjectSeo;
 
 class PageManager extends \common\components\Component
 {
@@ -71,6 +72,13 @@ class PageManager extends \common\components\Component
                   )
                 : [];
             $model->infos[$name] = $infoAttributes;
+            $model->meta[$name] = isset($existingInfos[$name])
+                ? $existingInfos[$name]->getMetaAsArray('meta')
+                : [
+                    'title' => '',
+                    'description' => '',
+                    'keywords'
+                ];
         }
     }
     
@@ -89,6 +97,9 @@ class PageManager extends \common\components\Component
         $transaction = Yii::$app->getDb()->beginTransaction();
         try {
             if ($page->delete()) {
+                $urlManager = Yii::$app->urlManager;
+                $urlManager->clearUrlCache($page);
+                $urlManager->deleteObjectSeoByObjectId($page->object_id);
                 PageInfo::deleteAll(['page_id' => $page->id]);
                 $transaction->commit();
                 return true;
@@ -127,6 +138,7 @@ class PageManager extends \common\components\Component
                     'Page' => $page->getErrors()
                 ];
             }
+            
             foreach ($form->infos as $lang => $infoAttributes) {
                 $pageInfo = new PageInfo();
                 $pageInfo->attributes = $infoAttributes;
@@ -134,23 +146,33 @@ class PageManager extends \common\components\Component
                 if (($langId = array_search($lang, $langs)) === false) {
                     $transaction->rollBack();
                     return [
-                        'infos' => [
-                            $lang => [
-                                'lang_id' => 'Unknown language name.'
-                            ]
-                        ]
+                        'infos[' . $lang . '][lang_id]'  => ['Unknown language name.']
                     ];
                 }
                 $pageInfo->lang_id = $langId;
+                $pageInfo->setMetaFromArray(
+                    'meta',
+                    isset($form->meta[$lang])
+                        ? $form->meta[$lang]
+                        : [
+                            'title' => '',
+                            'description' => '',
+                            'keywords' => ''
+                        ]
+                );
                 if (! $pageInfo->save()) {
                     $transaction->rollBack();
-                    return [
-                        'infos' => [
-                            $lang => $pageInfo->getErrors()
-                        ]
-                    ];
+                    $ret = [];
+                    foreach ($pageInfo->getErrors() as $attr => $errors) {
+                        $ret['infos[' . $lang . '][' . $attr . ']'] = $errors;
+                    }
+                    return $ret;
                 }
             }
+            
+            $page->refresh();
+            Yii::$app->urlManager->buildSefUrl($page);
+            
         } catch (\yii\db\Exception $e) {
             Yii::error('Unable to create an page because of db error: ' . $e->getMessage());
         }
@@ -189,6 +211,7 @@ class PageManager extends \common\components\Component
                     'Page' => $page->getErrors()
                 ];
             }
+            
             $existingInfos = [];
             foreach ($page->infos as $pageInfo) {
                 $existingInfos[$langs[$pageInfo->lang_id]] = $pageInfo;
@@ -203,15 +226,28 @@ class PageManager extends \common\components\Component
                     $pageInfo->page_id = $page->id;
                 }
                 $pageInfo->attributes = $infoAttributes;
+                $pageInfo->setMetaFromArray(
+                    'meta',
+                    isset($model->meta[$lang])
+                        ? $model->meta[$lang]
+                        : [
+                            'title' => '',
+                            'description' => '',
+                            'keywords' => ''
+                        ]
+                );
                 if (! $pageInfo->save()) {
                     $transaction->rollBack();
-                    return [
-                        'infos' => [
-                            $lang => $pageInfo->getErrors()
-                        ]
-                    ];
+                    $ret = [];
+                    foreach ($pageInfo->getErrors() as $attr => $errors) {
+                        $ret['infos[' . $lang . '][' . $attr . ']'] = $errors;
+                    }
+                    return $ret;
                 }
             }
+            
+            Yii::$app->urlManager->buildSefUrl($page);
+            
         } catch (\yii\db\Exception $e) {
             Yii::error('Unable to update the page because of db error: ' . $e->getMessage());
         }

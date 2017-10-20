@@ -94,10 +94,13 @@ class ArticleController extends Controller
         $model = new ArticleForm(['scenario' => 'insert']);
         $model->load(Yii::$app->request->post());
         $model->infos = Yii::$app->request->post('ArticleInfo');
+        $model->meta = Yii::$app->request->post('MetaForm');
         
         if ($model->validate() && ($result = $this->module->get('articleManager')->createArticle($model))) {
             if ($result instanceOf Article) {
                 return $this->redirect(['view', 'id' => $result->id]);
+            } else {
+                $model->addErrors($result);
             }
         }
         
@@ -122,9 +125,13 @@ class ArticleController extends Controller
         if (Yii::$app->request->getIsPost()) {
             $model->load(Yii::$app->request->post());
             $model->infos = Yii::$app->request->post('ArticleInfo');
+            $model->meta = Yii::$app->request->post('MetaForm');
             try {
-                if ($result = $this->module->get('articleManager')->updateArticleById($id, $model)) {
+                if (($result = $this->module->get('articleManager')->updateArticleById($id, $model)) &&
+                    $result instanceOf Article) {
                     return $this->redirect(['view', 'id' => $id]);
+                } else {
+                    $model->addErrors($result);
                 }
             } catch (\InvalidArgumentException $e) {
                 throw new BadRequestHttpException();

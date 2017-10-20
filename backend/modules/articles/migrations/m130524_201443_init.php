@@ -16,7 +16,7 @@ class m130524_201443_init extends Migration
             'status' => $this->smallInteger()->notNull()->defaultValue(0),
             'created_at' => $this->timestamp()->notNull(),
             'updated_at' => $this->timestamp()->notNull(),
-            'name' => $this->string(64)->notNull()
+            'name' => $this->string(64)->notNull()->unique()
         ]);
         $this->createIndex('lft', '{{%article_category}}', ['tree', 'lft', 'rgt']);
         $this->createIndex('rgt', '{{%article_category}}', ['tree', 'rgt']);
@@ -25,7 +25,7 @@ class m130524_201443_init extends Migration
             'id' => $this->primaryKey(),
             'article_category_id' => $this->integer()->notNull(),
             'lang_id' => $this->integer()->notNull(),
-            'url' => $this->string(256)->notNull()
+            'url' => $this->string(256)->notNull()->unique()
         ]);
         $this->createIndex(
             'article_category_info_category_lang_idx',

@@ -82,6 +82,8 @@ class CategoryController extends Controller
         if ($model->validate() && ($result = $this->module->get('categoryManager')->createCategory($model))) {
             if ($result instanceOf ArticleCategory) {
                 return $this->redirect(['view', 'id' => $result->id]);
+            } else {
+                $model->addErrors($result);
             }
         }
 
@@ -106,8 +108,12 @@ class CategoryController extends Controller
         if (Yii::$app->request->getIsPost()) {
             $model->load(Yii::$app->request->post());
             $model->infos = Yii::$app->request->post('ArticleCategoryInfo', []);
-            if ($result = $this->module->get('categoryManager')->updateCategoryById($id, $model)) {
+            if (($result = $this->module->get('categoryManager')->updateCategoryById($id, $model)) &&
+                $result instanceof ArticleCategory
+            ) {
                 return $this->redirect(['view', 'id' => $id]);
+            } else {
+                $model->addErrors($result);
             }
         } else {
             $this->module->get('categoryManager')->loadCategoryFormById($model, $id);

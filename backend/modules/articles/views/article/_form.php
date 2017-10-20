@@ -7,6 +7,8 @@ use yii\helpers\Url;
 use yii\bootstrap\Tabs;
 use backend\modules\articles\models\ArticleInfo;
 use kartik\select2\Select2;
+use common\models\MetaForm;
+use common\helpers\FormHelper;
 
 /* @var $this yii\web\View */
 /* @var $model app\modules\articles\models\ArticleForm */
@@ -17,6 +19,8 @@ use kartik\select2\Select2;
 <div class="article-form">
 
     <?php $form = ActiveForm::begin(); ?>
+
+	<h3><?= Yii::t('app', 'Attributes') ?></h3>
 
     <?= $form->field($model, 'name')->textInput(['maxlength' => true]) ?>
 
@@ -46,6 +50,9 @@ use kartik\select2\Select2;
             $infoModel = new ArticleInfo();
             $infoModel->attributes = isset($model->infos[$lang['name']])
                 ? $model->infos[$lang['name']] : [];
+            if ($infoErrors = FormHelper::getCustomErrors($model, 'infos', $lang['name'])) {
+                $infoModel->addErrors($infoErrors);
+            }
             $tabItems[] = [
                 'label' => $lang['label'],
                 'content' => $this->render('_form_info', [
@@ -57,6 +64,33 @@ use kartik\select2\Select2;
             ];
         }
     ?>
+    
+    <h3><?= Yii::t('app', 'Content') ?></h3>
+    
+    <?= Tabs::widget([
+        'items' => $tabItems
+    ]) ?>
+    
+    <?php
+        $tabItems = [];
+        foreach ($langs as $lang) {
+            $metaModel = new MetaForm();
+            $metaModel->attributes = isset($model->meta[$lang['name']])
+                ? $model->meta[$lang['name']]
+                : [];
+            $tabItems[] = [
+                'label' => $lang['label'],
+                'content' => $this->render('_form_meta', [
+                    'lang' => $lang,
+                    'meta' => $metaModel,
+                    'form' => $form,
+                    'model' => $model
+                ])
+            ];
+        }
+    ?>
+    
+    <h3><?= Yii::t('app', 'Meta') ?></h3>
     
     <?= Tabs::widget([
         'items' => $tabItems

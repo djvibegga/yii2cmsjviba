@@ -12,6 +12,7 @@ class PageForm extends Model
     public $name;
     public $status;
     public $infos = [];
+    public $meta = [];
     
     /**
      * {@inheritDoc}
@@ -42,7 +43,7 @@ class PageForm extends Model
             ],
             
             ['status', 'in', 'range' => array_keys(Page::getAvailableStatuses())],
-            ['infos', 'each', 'rule' => ['safe']],
+            [['infos', 'meta'], 'each', 'rule' => ['safe']],
         ];
     }
     
@@ -53,8 +54,8 @@ class PageForm extends Model
     public function scenarios()
     {
         return [
-            'insert' => ['name', 'status', 'infos'],
-            'update' => ['name', 'status', 'infos']
+            'insert' => ['name', 'status', 'infos', 'meta'],
+            'update' => ['name', 'status', 'infos', 'meta']
         ];
     }
 }

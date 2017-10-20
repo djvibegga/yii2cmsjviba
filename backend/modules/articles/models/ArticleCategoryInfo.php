@@ -32,6 +32,7 @@ class ArticleCategoryInfo extends \yii\db\ActiveRecord
             [['article_category_id', 'url'], 'required'],
             [['article_category_id'], 'integer'],
             [['url'], 'string', 'max' => 256],
+            [['url'], 'unique'],
             [['article_category_id'], 'exist', 'skipOnError' => true, 'targetClass' => ArticleCategory::className(), 'targetAttribute' => ['article_category_id' => 'id']],
         ];
     }
