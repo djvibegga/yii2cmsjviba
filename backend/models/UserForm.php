@@ -22,13 +22,20 @@ class UserForm extends Model
      */
     public function rules()
     {
+        $form = $this;
         return [
             ['username', 'trim'],
-            [['username', 'email', 'password', 'confirmPassword'], 'required'],
+            [['username', 'email'], 'required'],
+            [['password', 'confirmPassword'], 'required', 'on' => 'insert'],
             ['username', 'string', 'max' => 255],
             [
                 'email', 'unique',
                 'targetClass' => '\common\models\User',
+                'filter' => function ($query) use ($form) {
+                    if (! empty($form->id)) {
+                        $query->andWhere('id != :id', [':id' => $this->id]);
+                    }
+                },
                 'message' => Yii::t('app', 'This email has already been taken.')
             ],
             ['role', 'in', 'range' => array_keys(User::getAvailableRoles())],

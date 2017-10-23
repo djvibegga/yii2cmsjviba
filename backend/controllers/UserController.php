@@ -159,6 +159,7 @@ class UserController extends Controller
     public function actionUpdate($id)
     {
         $model = new UserForm(['scenario' => 'update']);
+        $this->getProfileManager()->loadUserFormById($model, $id);
         
         if (Yii::$app->request->getIsPost()) {
             $model->load(Yii::$app->request->post());
@@ -170,8 +171,6 @@ class UserController extends Controller
                     $model->addErrors($result);
                 }
             }
-        } else {
-            $this->getProfileManager()->loadUserFormById($model, $id);
         }
         
         return $this->render('update', [

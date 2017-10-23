@@ -2,6 +2,7 @@
 
 namespace backend\components;
 
+use Yii;
 use common\components\Component;
 use backend\models\UserForm;
 use common\models\User;
@@ -98,6 +99,7 @@ class ProfileManager extends Component
             return $model->getErrors();
         }
         
+        $transaction = Yii::$app->getDb()->beginTransaction();
         try {
             $user = new User();
             $user->attributes = $model->attributes;
@@ -106,17 +108,52 @@ class ProfileManager extends Component
             $user->generatePasswordResetToken();
             $user->generateAuthKey();
             if (! $user->save()) {
+                $transaction->rollBack();
                 return $user->getErrors();
             }
             $user->refresh();
+            if ($user->status == User::STATUS_NOT_VERIFIED) {
+                if (! $this->sendActivationEmail($user)) {
+                    $transaction->rollBack();
+                    return [
+                        'email' => Yii::t('app', 'Unable to send an activation email.')
+                    ];
+                }
+            }
         } catch (\yii\db\Exception $e) {
+            $transaction->rollBack();
             Yii::error('Unable to create a user because of db error: ' . $e->getMessage());
             return [
                 'email' => Yii::t('app', 'Unable to create a user because of database error.')
             ];
         }
         
+        $transaction->commit();
         return $user;
+    }
+    
+    /**
+     * Sends an activation email to the user
+     * @param User $user the user record
+     * @return bool whether operation has successfully completed
+     */
+    public function sendActivationEmail(User $user)
+    {
+        return Yii::$app->mailer
+            ->compose(
+                [
+                    'html' => 'activateAccount-html',
+                    'text' => 'activateAccount-text'
+                ],
+                [
+                    'user' => $user
+                ]
+            )
+            ->setTo($user->email)
+            ->setSubject(
+                Yii::t('app', 'You was registered. Please activate your account.')
+            )
+            ->send();
     }
     
     /**

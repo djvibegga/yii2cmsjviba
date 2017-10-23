@@ -51,6 +51,9 @@ class LoginForm extends Model
             if ($user && $user->status == User::STATUS_NOT_VERIFIED) {
                 $this->addError('email', 'Account is not verified. Check mail box.');
             }
+            if ($user && $user->status == User::STATUS_DELETED) {
+                $this->addError('email', 'Your account is suspended.');
+            }
         }
     }
 
