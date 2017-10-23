@@ -178,6 +178,7 @@ class ProfileManager extends Component
         
         try {
             $user->attributes = $model->attributes;
+            $user->setPassword($model->password);
             if (! $user->save()) {
                 return $user->getErrors();
             }
