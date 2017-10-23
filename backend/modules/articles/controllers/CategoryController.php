@@ -10,6 +10,7 @@ use yii\filters\VerbFilter;
 use yii\web\BadRequestHttpException;
 use backend\modules\articles\models\ArticleCategoryForm;
 use common\models\Language;
+use backend\modules\articles\components\CategoryManager;
 
 /**
  * ArticleCategoryController implements the CRUD actions for ArticleCategory model.
@@ -35,6 +36,15 @@ class CategoryController extends Controller
             ],
         ];
     }
+    
+    /**
+     * Returns category manager instance
+     * @return CategoryManager
+     */
+    protected function getCategoryManager()
+    {
+        return $this->module->get('categoryManager');
+    }
 
     /**
      * Lists all ArticleCategory models.
@@ -42,7 +52,7 @@ class CategoryController extends Controller
      */
     public function actionIndex()
     {
-        $dataProvider = $this->module->get('categoryManager')->getDataProvider();
+        $dataProvider = $this->getCategoryManager()->getDataProvider();
         return $this->render('index', [
             'dataProvider' => $dataProvider,
         ]);
@@ -56,7 +66,7 @@ class CategoryController extends Controller
     public function actionView($id)
     {
         try {
-            $model = $this->module->get('categoryManager')->loadCategoryById($id);
+            $model = $this->getCategoryManager()->loadCategoryById($id);
         } catch (\InvalidArgumentException $e) {
             throw new BadRequestHttpException();
         }
@@ -79,7 +89,7 @@ class CategoryController extends Controller
         $model->load(Yii::$app->request->post());
         $model->infos = Yii::$app->request->post('ArticleCategoryInfo', []);
         
-        if ($model->validate() && ($result = $this->module->get('categoryManager')->createCategory($model))) {
+        if ($model->validate() && ($result = $this->getCategoryManager()->createCategory($model))) {
             if ($result instanceOf ArticleCategory) {
                 return $this->redirect(['view', 'id' => $result->id]);
             } else {
@@ -108,7 +118,7 @@ class CategoryController extends Controller
         if (Yii::$app->request->getIsPost()) {
             $model->load(Yii::$app->request->post());
             $model->infos = Yii::$app->request->post('ArticleCategoryInfo', []);
-            if (($result = $this->module->get('categoryManager')->updateCategoryById($id, $model)) &&
+            if (($result = $this->getCategoryManager()->updateCategoryById($id, $model)) &&
                 $result instanceof ArticleCategory
             ) {
                 return $this->redirect(['view', 'id' => $id]);
@@ -116,7 +126,7 @@ class CategoryController extends Controller
                 $model->addErrors($result);
             }
         } else {
-            $this->module->get('categoryManager')->loadCategoryFormById($model, $id);
+            $this->getCategoryManager()->loadCategoryFormById($model, $id);
         }
         
         return $this->render('update', [
@@ -136,7 +146,7 @@ class CategoryController extends Controller
     public function actionDelete($id)
     {
         try {
-            $this->module->get('categoryManager')->deleteCategoryById($id);
+            $this->getCategoryManager()->deleteCategoryById($id);
         } catch (\InvalidArgumentException $e) {
             throw new BadRequestHttpException();
         } catch (InvalidParamException $e) {

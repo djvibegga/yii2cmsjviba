@@ -62,6 +62,13 @@ return [
             'enableStrictParsing' => false,
             'rules' => require __DIR__ . '/../../backend/config/routes.php'
         ],
+        'authManager' => [
+            'class' => 'yii\rbac\PhpManager',
+            'defaultRoles' => ['guest'],
+            'itemFile' => '@common/rbac/items.php',
+            'assignmentFile' => '@common/rbac/assignments.php',
+            'ruleFile' => '@common/rbac/rules.php'
+        ],
         'cacheAdapterFactory' => [
             'class' => 'common\components\caching\CacheAdapterFactory',
             'cacheComponentName' => 'memcache'

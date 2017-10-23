@@ -30,9 +30,18 @@ class User extends \yii\db\ActiveRecord implements IdentityInterface
     const ROLE_USER = 0;
     const ROLE_ADMIN = 1;
     
+    const ROLE_ADMIN_NAME = 'admin';
+    const ROLE_USER_NAME = 'user';
+    const ROLE_GUEST_NAME = 'guest';
+    
     const STATUS_NOT_VERIFIED = 0;
     const STATUS_ACTIVE = 1;
     const STATUS_DELETED = 2;
+    
+    /**
+     * @var array
+     */
+    private static $_usersMap = [];
     
     /**
      * @inheritdoc
@@ -103,7 +112,7 @@ class User extends \yii\db\ActiveRecord implements IdentityInterface
      */
     public static function findIdentity($id)
     {
-        return self::findOne($id);
+        return self::findOneByIdUsingCache($id);
     }
     
     /**
@@ -154,6 +163,22 @@ class User extends \yii\db\ActiveRecord implements IdentityInterface
         $timestamp = (int) substr($token, strrpos($token, '_') + 1);
         $expire = Yii::$app->params['user.passwordResetTokenExpire'];
         return $timestamp + $expire >= time();
+    }
+    
+    /**
+     * Finds user in db/cache
+     * @param int $userId the user id
+     * @return User|null
+     */
+    public static function findOneByIdUsingCache($userId)
+    {
+        if (!isset(self::$_usersMap[$userId])) {
+            if ($user = self::findOne($userId)) {
+                return self::$_usersMap[$userId] = $user;
+            }
+            return null;
+        }
+        return self::$_usersMap[$userId];
     }
     
     /**

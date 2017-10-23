@@ -28,6 +28,8 @@ class DataController extends Controller
         $transaction = Yii::$app->getDb()->beginTransaction();
         
         $user = new User();
+        $user->role = User::ROLE_ADMIN;
+        $user->status = User::STATUS_ACTIVE;
         $user->username = 'test user 1';
         $user->email = 'testuser1@gmail.com';
         $user->generateAuthKey();

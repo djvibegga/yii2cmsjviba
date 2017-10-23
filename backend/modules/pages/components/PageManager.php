@@ -9,14 +9,19 @@ use backend\modules\pages\models\PageInfo;
 use common\models\Language;
 use yii\data\ActiveDataProvider;
 use yii\base\InvalidParamException;
-use common\models\ObjectSeo;
 
 class PageManager extends \common\components\Component
 {
+    const PERM_CREATE = 'pageCreate';
+    const PERM_UPDATE = 'pageUpdate';
+    const PERM_DELETE = 'pageDelete';
+    const PERM_LIST = 'pageList';
+    const PERM_VIEW = 'pageView';
+    
     /**
      * Returns built data provider to fetch list of pages
      * @param array $params request parameters
-     * @return \backend\modules\pages\components\ActiveDataProvider
+     * @return @return \yii\data\ActiveDataProvider
      */
     public function getDataProvider(array $params = [])
     {

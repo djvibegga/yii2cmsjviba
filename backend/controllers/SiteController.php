@@ -6,6 +6,8 @@ use yii\web\Controller;
 use yii\filters\VerbFilter;
 use yii\filters\AccessControl;
 use common\models\LoginForm;
+use yii\web\NotFoundHttpException;
+use common\models\User;
 
 /**
  * Site controller
@@ -33,7 +35,12 @@ class SiteController extends Controller
                     [
                         'actions' => ['admin'],
                         'allow' => true,
-                        'roles' => ['@']
+                        'roles' => [User::ROLE_ADMIN_NAME]
+                    ],
+                    [
+                        'actions' => ['log-as'],
+                        'allow' => true,
+                        'roles' => [User::ROLE_ADMIN_NAME]
                     ]
                 ],
             ],
@@ -91,12 +98,38 @@ class SiteController extends Controller
 
         $model = new LoginForm();
         if ($model->load(Yii::$app->request->post()) && $model->login()) {
+            if (Yii::$app->user->can(User::ROLE_ADMIN_NAME)) {
+                return $this->redirect(['/user/index']);
+            }
             return $this->goBack();
         } else {
             return $this->render('login', [
                 'model' => $model,
             ]);
         }
+    }
+    
+    /**
+     * Logs in admin user as other user
+     * @param int $id the user id
+     * @throws BadRequestHttpException
+     * @throws NotFoundHttpException
+     * @return \yii\web\Response
+     */
+    public function actionLogAs($id)
+    {
+        try {
+            $user = Yii::$app->profileManager->loadUserById($id);
+        } catch (\InvalidArgumentException $e) {
+            throw new BadRequestHttpException();
+        }
+        if (! $user) {
+            throw new NotFoundHttpException('User has not found.');
+        }
+        if (Yii::$app->user->login($user, 0)) {
+            return $this->goHome();
+        }
+        return $this->goBack();
     }
 
     /**

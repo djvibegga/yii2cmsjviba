@@ -3,6 +3,7 @@
 use yii\helpers\Html;
 use yii\grid\GridView;
 use common\models\User;
+use yii\helpers\Url;
 
 /* @var $this yii\web\View */
 /* @var $dataProvider yii\data\ActiveDataProvider */
@@ -40,7 +41,18 @@ $this->params['breadcrumbs'][] = $this->title;
                 }
             ],
             'created_at',
-            ['class' => 'yii\grid\ActionColumn'],
+            [
+                'class' => 'yii\grid\ActionColumn',
+                'template' => "{log-as}\n{view}\n{update}\n{delete}",
+                'buttons' => [
+                    'log-as' => function($url, $model, $key) {
+                        return Html::a(
+                            '<i class="glyphicon glyphicon-share-alt"></i>',
+                            Url::to(['/site/log-as', 'id' => $model->id])
+                        );
+                    }
+                ]
+            ],
         ],
     ]); ?>
 </div>

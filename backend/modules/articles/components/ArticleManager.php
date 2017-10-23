@@ -12,10 +12,16 @@ use yii\base\InvalidParamException;
 
 class ArticleManager extends \common\components\Component
 {
+    const PERM_CREATE = 'articleCreate';
+    const PERM_UPDATE = 'articleUpdate';
+    const PERM_DELETE = 'articleDelete';
+    const PERM_LIST = 'articleList';
+    const PERM_VIEW = 'articleView';
+    
     /**
      * Returns built data provider to fetch list of articles
      * @param array $params request parameters
-     * @return \backend\modules\articles\components\ActiveDataProvider
+     * @return \yii\data\ActiveDataProvider
      */
     public function getDataProvider(array $params = [])
     {
@@ -185,6 +191,10 @@ class ArticleManager extends \common\components\Component
             
         } catch (\yii\db\Exception $e) {
             Yii::error('Unable to create an article because of db error: ' . $e->getMessage());
+            $transaction->rollBack();
+            return [
+                'name' => Yii::t('app', 'Unable to create an article because of database error.')
+            ];
         }
         
         $transaction->commit();
@@ -196,7 +206,8 @@ class ArticleManager extends \common\components\Component
      * to the data set in the article form object
      * @param int         $articleId the article id
      * @param ArticleForm $model     the article model
-     * @return bool whether operation has successfully completed
+     * @return Article the updated record on success, otherwise
+     * list of errors
      * @throws \InvalidArgumentException if the article id is invalid
      * @throws InvalidParamException     if the article has not found
      */
@@ -267,6 +278,10 @@ class ArticleManager extends \common\components\Component
             
         } catch (\yii\db\Exception $e) {
             Yii::error('Unable to update the article because of db error: ' . $e->getMessage());
+            $transaction->rollBack();
+            return [
+                'name' => Yii::t('app', 'Unable to update the article because of database error.')
+            ];
         }
         
         $transaction->commit();

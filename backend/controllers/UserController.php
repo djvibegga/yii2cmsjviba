@@ -4,10 +4,15 @@ namespace backend\controllers;
 
 use Yii;
 use common\models\User;
-use yii\data\ActiveDataProvider;
 use yii\web\Controller;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
+use backend\models\UserForm;
+use backend\components\ProfileManager;
+use yii\web\BadRequestHttpException;
+use yii\base\InvalidParamException;
+use yii\web\ServerErrorHttpException;
+use yii\filters\AccessControl;
 
 /**
  * UserController implements the CRUD actions for User model.
@@ -25,6 +30,51 @@ class UserController extends Controller
     public function behaviors()
     {
         return [
+            'access' => [
+                'class' => AccessControl::className(),
+                'rules' => [
+                    [
+                        'allow' => true,
+                        'actions' => ['create'],
+                        'roles' => [ProfileManager::PERM_CREATE]
+                    ],
+                    [
+                        'allow' => true,
+                        'actions' => ['index'],
+                        'roles' => [ProfileManager::PERM_LIST]
+                    ],
+                    [
+                        'allow' => true,
+                        'actions' => ['view'],
+                        'matchCallback' => function ($rule, $action) {
+                            return Yii::$app->user->can(
+                                ProfileManager::PERM_VIEW,
+                                ['user_id' => isset($_GET['id']) ? $_GET['id'] : null]
+                            );
+                        },
+                    ],
+                    [
+                        'allow' => true,
+                        'actions' => ['update'],
+                        'matchCallback' => function ($rule, $action) {
+                            return Yii::$app->user->can(
+                                ProfileManager::PERM_UPDATE,
+                                ['user_id' => isset($_GET['id']) ? $_GET['id'] : null]
+                            );
+                        },
+                    ],
+                    [
+                        'allow' => true,
+                        'actions' => ['delete'],
+                        'matchCallback' => function ($rule, $action) {
+                            return Yii::$app->user->can(
+                                ProfileManager::PERM_DELETE,
+                                ['user_id' => isset($_GET['id']) ? $_GET['id'] : null]
+                            );
+                        },
+                    ],
+                ],
+            ],
             'verbs' => [
                 'class' => VerbFilter::className(),
                 'actions' => [
@@ -33,16 +83,23 @@ class UserController extends Controller
             ],
         ];
     }
+    
+    /**
+     * Returns profile manager DI
+     * @return ProfileManager
+     */
+    protected function getProfileManager()
+    {
+        return Yii::$app->get('profileManager');
+    }
 
     /**
-     * Lists all User models.
+     * Lists all users.
      * @return mixed
      */
     public function actionIndex()
     {
-        $dataProvider = new ActiveDataProvider([
-            'query' => User::find(),
-        ]);
+        $dataProvider = $this->getProfileManager()->getDataProvider();
 
         return $this->render('index', [
             'dataProvider' => $dataProvider,
@@ -50,15 +107,21 @@ class UserController extends Controller
     }
 
     /**
-     * Displays a single User model.
+     * Displays a single user.
      * @param integer $id
      * @return mixed
      */
     public function actionView($id)
     {
-        return $this->render('view', [
-            'model' => $this->findModel($id),
-        ]);
+        try {
+            $model = $this->getProfileManager()->loadUserById($id);
+        } catch (\InvalidArgumentException $e) {
+            throw new BadRequestHttpException();
+        }
+        if (! $model) {
+            throw new NotFoundHttpException('User has not found.');
+        }
+        return $this->render('view', ['model' => $model]);
     }
 
     /**
@@ -68,17 +131,23 @@ class UserController extends Controller
      */
     public function actionCreate()
     {
-        $model = new User();
+        $model = new UserForm(['scenario' => 'insert']);
+        $model->load(Yii::$app->request->post());
 
-        if ($model->load(Yii::$app->request->post()) && $model->save()) {
-            return $this->redirect(['view', 'id' => $model->id]);
-        } else {
-            return $this->render('create', [
-                'model' => $model,
-                'statuses' => User::getAvailableStatuses(),
-                'roles' => User::getAvailableRoles()
-            ]);
+        if ($model->validate()) {
+            $result = $this->getProfileManager()->createUser($model);
+            if ($result instanceof User) {
+                return $this->redirect(['view', 'id' => $result->id]);
+            } else {
+                $model->addErrors($result);
+            }
         }
+        
+        return $this->render('create', [
+            'model' => $model,
+            'statuses' => User::getAvailableStatuses(),
+            'roles' => User::getAvailableRoles()
+        ]);
     }
 
     /**
@@ -89,17 +158,27 @@ class UserController extends Controller
      */
     public function actionUpdate($id)
     {
-        $model = $this->findModel($id);
-
-        if ($model->load(Yii::$app->request->post()) && $model->save()) {
-            return $this->redirect(['view', 'id' => $model->id]);
+        $model = new UserForm(['scenario' => 'update']);
+        
+        if (Yii::$app->request->getIsPost()) {
+            $model->load(Yii::$app->request->post());
+            if ($model->validate()) {
+                $result = $this->getProfileManager()->updateUserById($id, $model);
+                if ($result instanceof User) {
+                    return $this->redirect(['view', 'id' => $result->id]);
+                } else {
+                    $model->addErrors($result);
+                }
+            }
         } else {
-            return $this->render('update', [
-                'model' => $model,
-                'statuses' => User::getAvailableStatuses(),
-                'roles' => User::getAvailableRoles()
-            ]);
+            $this->getProfileManager()->loadUserFormById($model, $id);
         }
+        
+        return $this->render('update', [
+            'model' => $model,
+            'statuses' => User::getAvailableStatuses(),
+            'roles' => User::getAvailableRoles()
+        ]);
     }
 
     /**
@@ -110,24 +189,18 @@ class UserController extends Controller
      */
     public function actionDelete($id)
     {
-        $this->findModel($id)->delete();
-
-        return $this->redirect(['index']);
-    }
-
-    /**
-     * Finds the User model based on its primary key value.
-     * If the model is not found, a 404 HTTP exception will be thrown.
-     * @param integer $id
-     * @return User the loaded model
-     * @throws NotFoundHttpException if the model cannot be found
-     */
-    protected function findModel($id)
-    {
-        if (($model = User::findOne($id)) !== null) {
-            return $model;
+        try {
+            $result = $this->getProfileManager()->deleteUserById($id);
+        } catch (\InvalidArgumentException $e) {
+            throw new BadRequestHttpException();
+        } catch (InvalidParamException $e) {
+            throw new NotFoundHttpException();
+        }
+        
+        if ($result) {
+            return $this->redirect(['index']);
         } else {
-            throw new NotFoundHttpException('The requested page does not exist.');
+            throw new ServerErrorHttpException('Unable to delete the user.');
         }
     }
 }

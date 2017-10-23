@@ -48,6 +48,9 @@ class LoginForm extends Model
             if (!$user || !$user->validatePassword($this->password)) {
                 $this->addError($attribute, 'Incorrect username or password.');
             }
+            if ($user && $user->status == User::STATUS_NOT_VERIFIED) {
+                $this->addError('email', 'Account is not verified. Check mail box.');
+            }
         }
     }
 

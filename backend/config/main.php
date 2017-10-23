@@ -25,6 +25,13 @@ return [
                 'httpOnly' => true,
             ],
         ],
+        'authManager' => [
+            'class' => 'yii\rbac\PhpManager',
+            'defaultRoles' => ['guest', 'user', 'admin'],
+            'itemFile' => '@common/rbac/items.php',
+            'assignmentFile' => '@common/rbac/assignments.php',
+            'ruleFile' => '@common/rbac/rules.php'
+        ],
         'session' => [
             'cookieParams' => [
                 'httponly' => true,
@@ -90,6 +97,9 @@ return [
         ],
         'metaData' => [
             'class' => 'common\components\MetaDataWidget'
+        ],
+        'profileManager' => [
+            'class' => 'backend\components\ProfileManager',
         ]
     ],
     'modules' => [

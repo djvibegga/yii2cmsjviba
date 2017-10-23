@@ -11,6 +11,8 @@ use backend\modules\pages\models\Page;
 use backend\modules\pages\models\PageForm;
 use yii\base\InvalidParamException;
 use yii\web\BadRequestHttpException;
+use backend\modules\pages\components\PageManager;
+use yii\filters\AccessControl;
 
 /**
  * PageController implements the CRUD actions for Page model.
@@ -28,6 +30,51 @@ class PageController extends Controller
     public function behaviors()
     {
         return [
+            'access' => [
+                'class' => AccessControl::className(),
+                'rules' => [
+                    [
+                        'allow' => true,
+                        'actions' => ['create'],
+                        'roles' => [PageManager::PERM_CREATE]
+                    ],
+                    [
+                        'allow' => true,
+                        'actions' => ['index'],
+                        'roles' => [PageManager::PERM_LIST]
+                    ],
+                    [
+                        'allow' => true,
+                        'actions' => ['view'],
+                        'matchCallback' => function ($rule, $action) {
+                            return Yii::$app->user->can(
+                                PageManager::PERM_VIEW,
+                                ['page_id' => isset($_GET['id']) ? $_GET['id'] : null]
+                            );
+                        },
+                    ],
+                    [
+                        'allow' => true,
+                        'actions' => ['update'],
+                        'matchCallback' => function ($rule, $action) {
+                            return Yii::$app->user->can(
+                                PageManager::PERM_UPDATE,
+                                ['page_id' => isset($_GET['id']) ? $_GET['id'] : null]
+                            );
+                        },
+                    ],
+                    [
+                        'allow' => true,
+                        'actions' => ['delete'],
+                        'matchCallback' => function ($rule, $action) {
+                            return Yii::$app->user->can(
+                                PageManager::PERM_DELETE,
+                                ['page_id' => isset($_GET['id']) ? $_GET['id'] : null]
+                            );
+                        },
+                    ],
+                ],
+            ],
             'verbs' => [
                 'class' => VerbFilter::className(),
                 'actions' => [
@@ -36,6 +83,15 @@ class PageController extends Controller
             ],
         ];
     }
+    
+    /**
+     * Returns page manager instance
+     * @return PageManager
+     */
+    protected function getPageManager()
+    {
+        return $this->module->get('pageManager');
+    }
 
     /**
      * Lists all pages.
@@ -43,7 +99,7 @@ class PageController extends Controller
      */
     public function actionIndex()
     {
-        $dataProvider = $this->module->get('pageManager')->getDataProvider();
+        $dataProvider = $this->getPageManager()->getDataProvider();
         return $this->render('index', [
             'dataProvider' => $dataProvider
         ]);
@@ -57,7 +113,7 @@ class PageController extends Controller
     public function actionView($id)
     {
         try {
-            $model = $this->module->get('pageManager')->loadPageById($id);
+            $model = $this->getPageManager()->loadPageById($id);
         } catch (\InvalidArgumentException $e) {
             throw new BadRequestHttpException();
         }
@@ -82,7 +138,7 @@ class PageController extends Controller
         $model->infos = Yii::$app->request->post('PageInfo');
         $model->meta = Yii::$app->request->post('MetaForm');
         
-        if ($model->validate() && ($result = $this->module->get('pageManager')->createPage($model))) {
+        if ($model->validate() && ($result = $this->getPageManager()->createPage($model))) {
             if ($result instanceOf Page) {
                 return $this->redirect(['view', 'id' => $result->id]);
             } else {
@@ -111,15 +167,17 @@ class PageController extends Controller
             $model->load(Yii::$app->request->post());
             $model->infos = Yii::$app->request->post('PageInfo');
             $model->meta = Yii::$app->request->post('MetaForm');
-            if (($result = $this->module->get('pageManager')->updatePageById($id, $model)) &&
-                $result instanceOf Page
-            ) {
-                return $this->redirect(['view', 'id' => $id]);
-            } else {
-                $model->addErrors($result);
+            if ($model->validate()) {
+                if (($result = $this->getPageManager()->updatePageById($id, $model)) &&
+                    $result instanceOf Page
+                ) {
+                    return $this->redirect(['view', 'id' => $id]);
+                } else {
+                    $model->addErrors($result);
+                }
             }
         } else {
-            $this->module->get('pageManager')->loadPageFormById($model, $id);
+            $this->getPageManager()->loadPageFormById($model, $id);
         }
         
         return $this->render('update', [
@@ -138,7 +196,7 @@ class PageController extends Controller
     public function actionDelete($id)
     {
         try {
-            $this->module->get('pageManager')->deletePageById($id);
+            $this->getPageManager()->deletePageById($id);
         } catch (\InvalidArgumentException $e) {
             throw new BadRequestHttpException();
         } catch (InvalidParamException $e) {
