@@ -51,6 +51,7 @@ class ArticleForm extends Model
      */
     public function rules()
     {
+        $form = $this;
         return [
             ['name', 'trim'],
             [['name', 'categories'], 'required'],
@@ -58,7 +59,12 @@ class ArticleForm extends Model
             [
                 'name', 'unique',
                 'targetClass' => '\backend\modules\articles\models\Article',
-                'message' => Yii::t('app', 'This article name has already been taken.')
+                'message' => Yii::t('app', 'This article name has already been taken.'),
+                'filter' => function ($query) use ($form) {
+                    if (! empty($form->id)) {
+                        $query->andWhere('id != :id', [':id' => $this->id]);
+                    }
+                },
             ],
             
             ['status', 'in', 'range' => array_keys(Article::getAvailableStatuses())],

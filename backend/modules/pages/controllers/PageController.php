@@ -162,6 +162,13 @@ class PageController extends Controller
     public function actionUpdate($id)
     {
         $model = new PageForm(['scenario' => 'update']);
+        try {
+            $this->getPageManager()->loadPageFormById($model, $id);
+        } catch (\InvalidArgumentException $e) {
+            throw new BadRequestHttpException();
+        } catch (InvalidParamException $e) {
+            throw new NotFoundHttpException($e->getMessage());
+        }
         
         if (Yii::$app->request->getIsPost()) {
             $model->load(Yii::$app->request->post());
@@ -176,8 +183,6 @@ class PageController extends Controller
                     $model->addErrors($result);
                 }
             }
-        } else {
-            $this->getPageManager()->loadPageFormById($model, $id);
         }
         
         return $this->render('update', [

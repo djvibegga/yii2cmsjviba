@@ -19,9 +19,9 @@ return [
         'migrate' => [
             'class' => 'dmstr\console\controllers\MigrateController'
         ],
-        'recache' => array(
+        'recache' => [
             'class' => 'console\controllers\RecacheController',
-            'sources' => array(
+            'sources' => [
                 'backend\modules\articles\components\ArticleUrlRule' => [
                     'pattern' => '<category:[\w-]+>/<name:[\w-]+>',
                     'route' => 'articles/article/view',
@@ -39,9 +39,25 @@ return [
                     'route' => 'pages/page/view',
                     'template' => 'pages/{sefPart}',
                     'cacheComponentName' => 'memcache'
-                ]
-            ),
-        ),
+                ],
+            ],
+        ],
+        'daemon' => [
+            'class' => 'inpassor\daemon\Controller',
+            'uid' => 'daemon', // The daemon UID. Giving daemons different UIDs makes possible to run several daemons.
+            'pidDir' => '@runtime/daemon', // PID file directory.
+            'logsDir' => '@runtime/logs', // Log files directory.
+            'clearLogs' => false, // Clear log files on start.
+            'workersMap' => [
+                'watcher' => [
+                    'class' => 'inpassor\daemon\workers\Watcher',
+                    'active' => true, // If set to false, worker is disabled.
+                    'maxProcesses' => 1, // The number of maximum processes of the daemon worker running at once.
+                    'delay' => 60, // The time, in seconds, the timer should delay in between executions of the daemon worker.
+                ],
+                'urlRebuild' => 'console\controllers\workers\UrlRebuildWorker'
+            ],
+        ],
     ],
     'components' => [
         'log' => [

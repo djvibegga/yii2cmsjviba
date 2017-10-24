@@ -55,10 +55,27 @@ class m130524_201442_init extends Migration
             'count' => $this->integer()->notNull(),
             'updated_at' => $this->timestamp()->notNull(),
         ]);
+        
+        $this->createTable(
+            '{{%seo_recalc_queue}}',
+            [
+                'id' => $this->primaryKey(),
+                'type' => $this->string(256)->notNull(),
+                'ids' => 'integer[] not null',
+                'created_at' => $this->timestamp()->notNull()->defaultValue(new \yii\db\Expression('NOW()')),
+                'b_processed' => $this->boolean()->notNull()->defaultValue(false)
+            ]
+        );
+        $this->createIndex(
+            '{{%seo_recalc_queue_created_idx}}',
+            '{{%seo_recalc_queue}}',
+            'created_at'
+        );
     }
 
     public function down()
     {
+        $this->dropTable('{{%seo_recalc_queue}}');
         $this->dropTable('{{%lang}}');
         $this->dropTable('{{%object_seo}}');
         $this->dropTable('{{%object_view}}');

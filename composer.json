@@ -22,7 +22,8 @@
         "dmstr/yii2-migrate-command": "*",
         "moonlandsoft/yii2-tinymce": "*",
         "paulzi/yii2-nested-sets": "^1.0",
-        "kartik-v/yii2-widget-select2": "@dev"
+        "kartik-v/yii2-widget-select2": "@dev",
+        "inpassor/yii2-daemon": "^0.3.2"
     },
     "require-dev": {
         "yiisoft/yii2-debug": "~2.0.0",

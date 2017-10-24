@@ -37,7 +37,7 @@ class ArticleController extends Controller
                 'rules' => [
                     [
                         'allow' => true,
-                        'actions' => ['create'],
+                        'actions' => ['create', 'upload-photo'],
                         'roles' => [ArticleManager::PERM_CREATE]
                     ],
                     [
@@ -178,6 +178,13 @@ class ArticleController extends Controller
     public function actionUpdate($id)
     {
         $model = new ArticleForm(['scenario' => 'update']);
+        try {
+            $this->module->get('articleManager')->loadArticleFormById($model, $id);
+        } catch (\InvalidArgumentException $e) {
+            throw new BadRequestHttpException();
+        } catch (InvalidParamException $e) {
+            throw new NotFoundHttpException($e->getMessage());
+        }
 
         if (Yii::$app->request->getIsPost()) {
             $model->load(Yii::$app->request->post());
@@ -196,14 +203,6 @@ class ArticleController extends Controller
                 } catch (InvalidParamException $e) {
                     throw new NotFoundHttpException($e->getMessage());
                 }
-            }
-        } else {
-            try {
-                $this->module->get('articleManager')->loadArticleFormById($model, $id);
-            } catch (\InvalidArgumentException $e) {
-                throw new BadRequestHttpException();
-            } catch (InvalidParamException $e) {
-                throw new NotFoundHttpException($e->getMessage());
             }
         }
         

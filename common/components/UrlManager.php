@@ -70,23 +70,6 @@ class UrlManager extends \yii\web\UrlManager
     public $useLangBasedUrls = true;
     
     /**
-     * Entity URLs dependency map. Keys are dependent
-     * entities class names, values are set with class
-     * names which are affected to dependent entities.
-     * @example:
-     * <pre>
-     * array(
-     *    '\backend\modules\articles\models\Article' => array(
-     *         '\backend\modules\articles\models\ArticleCategory',
-     *    ),
-     *    ...
-     * ),
-     * </pre>
-     * @var array
-     */
-//     public $entityDependenciesMap = array();
-    
-    /**
      * Application default language
      * @var string
      */
@@ -101,27 +84,6 @@ class UrlManager extends \yii\web\UrlManager
         parent::init();
         $this->_defaultLanguage = Yii::$app->language;
     }
-    
-    /**
-     * Resolves dependent entity class list by given affected entity
-     *
-     * @param string|object $affectedEntity entity which SEF url was affected
-     *
-     * @return array
-     */
-//     public function resolveDependentEntities($affectedEntity)
-//     {
-//         $affectedClassName = is_object($affectedEntity)
-//             ? get_class($affectedEntity)
-//             : $affectedEntity;
-//         $ret = array();
-//         foreach ($this->entityDependenciesMap as $dependent => $affected) {
-//             if (in_array($affectedClassName, $affected)) {
-//                 $ret[] = $dependent;
-//             }
-//         }
-//         return $ret;
-//     }
     
     /**
      * Returns custom rule class by the class name.
@@ -311,6 +273,13 @@ class UrlManager extends \yii\web\UrlManager
             if ($rule instanceof ICacheableDataSource) {
                 $this->refreshUrlCache($record);
             }
+            if ($this->getBehavior('urlDependencies')) {
+                $dependentClassList = $this->resolveDependentEntities($record);
+                if (! empty($dependentClassList)) {
+                    $this->scheduleRefreshDependentList($record, $dependentClassList);
+                }
+            }
+            return true;
         } else {
             throw new InvalidParamException(
                 'Url rule "' . $ruleClass . '" is not defined in routes. Please check configuration.'
@@ -349,6 +318,9 @@ class UrlManager extends \yii\web\UrlManager
      */
     public function clearUrlCache(ObjectRecord $record)
     {
+        if (! $record instanceOf IHasSefUrl) {
+            return;
+        }
         $rule = $this->getRuleByClassName($record->getUrlRuleClassName());
         if (! $rule || ! $rule instanceOf ComponentUrlRuleWithCache) {
             throw new InvalidParamException('Given record is not acceptable to clear url cache.');

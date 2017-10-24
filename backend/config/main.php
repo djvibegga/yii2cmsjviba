@@ -89,7 +89,7 @@ return [
             ]
         ],
         'urlManager' => [
-            'class' => 'common\components\UrlManager',
+            'class' => 'backend\components\UrlManager',
             'enablePrettyUrl' => true,
             'showScriptName' => false,
             'enableStrictParsing' => false,

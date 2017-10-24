@@ -7,7 +7,8 @@
 
 use yii\helpers\Html;
 
-$value = $model->{$widget->attribute} ? base64_encode($model->{$widget->attribute}) : '';
+$value = !empty($model->{$widget->attribute}) && $model->{$widget->attribute} != '{}'
+    ? base64_encode($model->{$widget->attribute}) : '';
 ?>
 
 <div class="cropper-widget">

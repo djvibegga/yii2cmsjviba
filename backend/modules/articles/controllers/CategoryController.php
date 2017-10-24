@@ -11,6 +11,7 @@ use yii\web\BadRequestHttpException;
 use backend\modules\articles\models\ArticleCategoryForm;
 use common\models\Language;
 use backend\modules\articles\components\CategoryManager;
+use yii\base\InvalidParamException;
 
 /**
  * ArticleCategoryController implements the CRUD actions for ArticleCategory model.
@@ -115,6 +116,14 @@ class CategoryController extends Controller
     {
         $model = new ArticleCategoryForm(['scenario' => 'update']);
         
+        try {
+            $this->getCategoryManager()->loadCategoryFormById($model, $id);
+        } catch (\InvalidArgumentException $e) {
+            throw new BadRequestHttpException();
+        } catch (InvalidParamException $e) {
+            throw new NotFoundHttpException('Category has not found.');
+        }
+        
         if (Yii::$app->request->getIsPost()) {
             $model->load(Yii::$app->request->post());
             $model->infos = Yii::$app->request->post('ArticleCategoryInfo', []);
@@ -125,8 +134,6 @@ class CategoryController extends Controller
             } else {
                 $model->addErrors($result);
             }
-        } else {
-            $this->getCategoryManager()->loadCategoryFormById($model, $id);
         }
         
         return $this->render('update', [

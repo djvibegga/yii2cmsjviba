@@ -17,8 +17,8 @@ class m130524_201444_init extends Migration
             'published_at' => $this->dateTime(),
         ]);
         
-        $this->createIndex('user_idx', '{{%page}}', 'user_id');
-        $this->addForeignKey('fk_user', '{{%page}}', 'user_id', '{{%user}}', 'id', 'CASCADE', 'CASCADE');
+        $this->createIndex('{{%page_user_idx}}', '{{%page}}', 'user_id');
+        $this->addForeignKey('{{%fk_page_user}}', '{{%page}}', 'user_id', '{{%user}}', 'id', 'CASCADE', 'CASCADE');
 
         $this->createTable('{{%page_info}}', [
             'id' => $this->primaryKey(),

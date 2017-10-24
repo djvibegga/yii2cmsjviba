@@ -12,7 +12,7 @@ Yii::$app->metaData->setDataFromJsonMetaAttribute(
 );
 
 $this->params['breadcrumbs'][] = ['label' => Yii::t('app', 'Articles'), 'url' => ['index']];
-$this->params['breadcrumbs'][] = $this->title;
+$this->params['breadcrumbs'][] = $model->name;
 
 ?>
 <div class="article-view">
