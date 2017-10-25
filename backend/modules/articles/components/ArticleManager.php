@@ -109,6 +109,7 @@ class ArticleManager extends \common\components\Component
                 $urlManager->clearUrlCache($article);
                 $urlManager->deleteObjectSeoByObjectId($article->object_id);
                 ArticleInfo::deleteAll(['article_id' => $article->id]);
+                $article->deleteAllAttachedFiles();
                 $transaction->commit();
                 return true;
             }

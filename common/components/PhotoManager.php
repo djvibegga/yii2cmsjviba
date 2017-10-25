@@ -77,7 +77,7 @@ class PhotoManager extends Component
      */
     public function getPhotoAbsolutePath(Model $model, $attribute, $format = 'origin')
     {
-        $relativePath = $this->getPhotoRelativePath($attribute, $format);
+        $relativePath = $this->getPhotoRelativePath($model, $attribute, $format);
         return rtrim($model->storageBasePath) . '/' . ltrim($relativePath);
     }
     

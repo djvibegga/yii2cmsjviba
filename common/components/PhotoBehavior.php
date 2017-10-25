@@ -2,7 +2,10 @@
 
 namespace common\components;
 
+use Yii;
 use yii\behaviors\AttributeBehavior;
+use yii\db\ActiveRecord;
+use yii\base\Event;
 
 class PhotoBehavior extends AttributeBehavior
 {
@@ -64,6 +67,41 @@ class PhotoBehavior extends AttributeBehavior
         $owner = $this->owner;
         if (!empty($owner->$attribute)) {
             return json_decode($owner->$attribute, true);
+        }
+    }
+    
+    /**
+     * Deletes all attached files
+     * @return void
+     */
+    public function deleteAllAttachedFiles()
+    {
+        foreach ($this->photoAttributes as $attribute) {
+            $this->deleteAttachedFiles($attribute);
+        }
+    }
+    
+    /**
+     * Deletes files attached only for given attribute
+     * @param string $attribute the attribute name
+     * @return void
+     */
+    public function deleteAttachedFiles($attribute)
+    {
+        $photoManager = Yii::$app->photoManager;
+        try {
+            $path = $photoManager->getPhotoAbsolutePath($this->owner, $attribute);
+            @unlink($path);
+        } catch (\InvalidArgumentException $e) {
+            //comment: do nothing because there are no attached photos
+        }
+        foreach ($this->formats as $name => $config) {
+            try {
+                $path = $photoManager->getPhotoAbsolutePath($this->owner, $attribute, $name);
+                @unlink($path);
+            } catch (\InvalidArgumentException $e) {
+                //comment: do nothing because there are no attached photos
+            }
         }
     }
 }
