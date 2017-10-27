@@ -149,6 +149,7 @@ class CategoryController extends Controller
         $model = new ArticleCategoryForm(['scenario' => 'insert']);
         $model->load(Yii::$app->request->post());
         $model->infos = Yii::$app->request->post('ArticleCategoryInfo', []);
+        $model->meta = Yii::$app->request->post('MetaForm', []);
         
         if ($model->validate() && ($result = $this->getCategoryManager()->createCategory($model))) {
             if ($result instanceOf ArticleCategory) {
@@ -187,6 +188,7 @@ class CategoryController extends Controller
         if (Yii::$app->request->getIsPost()) {
             $model->load(Yii::$app->request->post());
             $model->infos = Yii::$app->request->post('ArticleCategoryInfo', []);
+            $model->meta = Yii::$app->request->post('MetaForm', []);
             if (($result = $this->getCategoryManager()->updateCategoryById($id, $model)) &&
                 $result instanceof ArticleCategory
             ) {
