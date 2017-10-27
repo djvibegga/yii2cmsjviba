@@ -9,6 +9,11 @@ return [
             'articleDelete',
             'articleList',
             'articleView',
+            'categoryCreate',
+            'categoryUpdate',
+            'categoryDelete',
+            'categoryList',
+            'categoryView',
             'pageCreate',
             'pageUpdate',
             'pageDelete',
@@ -26,6 +31,7 @@ return [
         'ruleName' => 'userRole',
         'children' => [
             'articleView',
+            'categoryView',
             'pageView',
             'userView',
         ],
@@ -58,6 +64,21 @@ return [
         'type' => 2,
     ],
     'pageView' => [
+        'type' => 2,
+    ],
+    'categoryCreate' => [
+        'type' => 2,
+    ],
+    'categoryUpdate' => [
+        'type' => 2,
+    ],
+    'categoryDelete' => [
+        'type' => 2,
+    ],
+    'categoryList' => [
+        'type' => 2,
+    ],
+    'categoryView' => [
         'type' => 2,
     ],
     'userCreate' => [

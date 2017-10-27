@@ -6,14 +6,17 @@ use Yii;
 use yii\base\Model;
 use common\models\Language;
 use common\components\TranslationBehavior;
+use common\components\PhotoBehavior;
 
 class ArticleCategoryForm extends Model
 {
     public $id;
     public $parent_id;
     public $name;
+    public $photo;
     public $status;
     public $infos = [];
+    public $meta = [];
     
     /**
      * {@inheritDoc}
@@ -39,6 +42,12 @@ class ArticleCategoryForm extends Model
                 'class' => TranslationBehavior::className(),
                 'modelClassName' => ArticleCategoryInfo::className(),
                 'foreignKey' => 'article_category_id'
+            ],
+            'photos' => [
+                'class' => PhotoBehavior::className(),
+                'photoAttributes' => ['photo'],
+                'storageBasePath' => Yii::getAlias('@backend/web') . '/upload/photos',
+                'storageBaseUrl' => '/upload/photos'
             ]
         ];
     }
@@ -66,7 +75,8 @@ class ArticleCategoryForm extends Model
             ['parent_id', 'integer'],
             
             ['status', 'in', 'range' => array_keys(ArticleCategory::getAvailableStatuses())],
-            ['infos', 'each', 'rule' => ['safe']],
+            [['infos', 'meta'] , 'each', 'rule' => ['safe']],
+            ['photo', 'safe'],
         ];
     }
     
@@ -77,8 +87,8 @@ class ArticleCategoryForm extends Model
     public function scenarios()
     {
         return [
-            'insert' => ['name', 'status', 'infos', 'parent_id'],
-            'update' => ['name', 'status', 'infos', 'parent_id']
+            'insert' => ['name', 'status', 'infos', 'photo', 'meta', 'parent_id'],
+            'update' => ['name', 'status', 'infos', 'photo', 'meta', 'parent_id']
         ];
     }
 }

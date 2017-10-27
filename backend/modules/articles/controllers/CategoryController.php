@@ -12,6 +12,8 @@ use backend\modules\articles\models\ArticleCategoryForm;
 use common\models\Language;
 use backend\modules\articles\components\CategoryManager;
 use yii\base\InvalidParamException;
+use yii\filters\AccessControl;
+use common\components\UploadAction;
 
 /**
  * ArticleCategoryController implements the CRUD actions for ArticleCategory model.
@@ -29,6 +31,51 @@ class CategoryController extends Controller
     public function behaviors()
     {
         return [
+            [
+                'class' => AccessControl::className(),
+                'rules' => [
+                    [
+                        'allow' => true,
+                        'actions' => ['create', 'upload-photo'],
+                        'roles' => [CategoryManager::PERM_CREATE]
+                    ],
+                    [
+                        'allow' => true,
+                        'actions' => ['index'],
+                        'roles' => [CategoryManager::PERM_LIST]
+                    ],
+                    [
+                        'allow' => true,
+                        'actions' => ['view'],
+                        'matchCallback' => function ($rule, $action) {
+                            return Yii::$app->user->can(
+                                CategoryManager::PERM_VIEW,
+                                ['category_id' => isset($_GET['id']) ? $_GET['id'] : null]
+                            );
+                        },
+                    ],
+                    [
+                        'allow' => true,
+                        'actions' => ['update'],
+                        'matchCallback' => function ($rule, $action) {
+                            return Yii::$app->user->can(
+                                CategoryManager::PERM_UPDATE,
+                                ['category_id' => isset($_GET['id']) ? $_GET['id'] : null]
+                            );
+                        },
+                    ],
+                    [
+                        'allow' => true,
+                        'actions' => ['delete'],
+                        'matchCallback' => function ($rule, $action) {
+                            return Yii::$app->user->can(
+                                CategoryManager::PERM_DELETE,
+                                ['category_id' => isset($_GET['id']) ? $_GET['id'] : null]
+                            );
+                        },
+                    ],
+                ],
+            ],
             'verbs' => [
                 'class' => VerbFilter::className(),
                 'actions' => [
@@ -45,6 +92,19 @@ class CategoryController extends Controller
     protected function getCategoryManager()
     {
         return $this->module->get('categoryManager');
+    }
+    
+    /**
+     * @inheritdoc
+     */
+    public function actions()
+    {
+        return [
+            'upload-photo' => [
+                'class' => UploadAction::className(),
+                'modelClass' => ArticleCategory::className()
+            ],
+        ];
     }
 
     /**

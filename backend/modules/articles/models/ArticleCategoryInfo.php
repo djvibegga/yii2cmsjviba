@@ -3,13 +3,15 @@
 namespace backend\modules\articles\models;
 
 use Yii;
+use common\components\MetaDataBehavior;
 
 /**
  * This is the model class for table "article_category_info".
  *
  * @property integer $id
  * @property integer $article_category_id
- * @property string $url
+ * @property string  $url
+ * @property string  $meta
  *
  * @property ArticleCategory $articleCategory
  */
@@ -21,6 +23,17 @@ class ArticleCategoryInfo extends \yii\db\ActiveRecord
     public static function tableName()
     {
         return 'article_category_info';
+    }
+    
+    /**
+     * {@inheritDoc}
+     * @see \yii\base\Component::behaviors()
+     */
+    public function behaviors()
+    {
+        return [
+            MetaDataBehavior::className()
+        ];
     }
 
     /**

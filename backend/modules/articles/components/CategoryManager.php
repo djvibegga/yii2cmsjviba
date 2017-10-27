@@ -12,6 +12,12 @@ use backend\modules\articles\models\ArticleCategoryInfo;
 
 class CategoryManager extends \common\components\Component
 {
+    const PERM_CREATE = 'categoryCreate';
+    const PERM_UPDATE = 'categoryUpdate';
+    const PERM_DELETE = 'categoryDelete';
+    const PERM_LIST = 'categoryList';
+    const PERM_VIEW = 'categoryView';
+    
     /**
      * Returns built data provider to fetch list of articles
      * @param array $params request parameters
@@ -59,7 +65,7 @@ class CategoryManager extends \common\components\Component
         if (! $category = $this->loadCategoryById($articleCategoryId)) {
             throw new InvalidParamException('Category has not found.');
         }
-        $model->setAttributes($category->getAttributes(['name', 'status']));
+        $model->setAttributes($category->getAttributes());
         $model->id = $articleCategoryId;
         $model->parent_id = $category->getParent()->one()->id;
         $langs = Language::getList();
@@ -74,6 +80,13 @@ class CategoryManager extends \common\components\Component
                   )
                 : [];
             $model->infos[$name] = $infoAttributes;
+            $model->meta[$name] = isset($existingInfos[$name])
+                ? $existingInfos[$name]->getMetaAsArray('meta')
+                : [
+                    'title' => '',
+                    'description' => '',
+                    'keywords'
+                ];
         }
     }
     
@@ -138,6 +151,16 @@ class CategoryManager extends \common\components\Component
                 $categoryInfo = new ArticleCategoryInfo();
                 $categoryInfo->attributes = $infoAttributes;
                 $categoryInfo->article_category_id = $category->id;
+                $categoryInfo->setMetaFromArray(
+                    'meta',
+                    isset($form->meta[$lang])
+                        ? $form->meta[$lang]
+                        : [
+                            'title' => '',
+                            'description' => '',
+                            'keywords' => ''
+                        ]
+                );
                 if (($langId = array_search($lang, $langs)) === false) {
                     $transaction->rollBack();
                     return [
@@ -190,7 +213,7 @@ class CategoryManager extends \common\components\Component
         }
         
         try {
-            $category->attributes = $model->getAttributes(['name', 'status']);
+            $category->attributes = $model->attributes;
             if ($category->getParent()->one()->id != $parentNode->id) {
                 $category->appendTo($parentNode);
             }
@@ -215,6 +238,16 @@ class CategoryManager extends \common\components\Component
                     $categoryInfo->article_category_id = $category->id;
                 }
                 $categoryInfo->attributes = $infoAttributes;
+                $categoryInfo->setMetaFromArray(
+                    'meta',
+                    isset($model->meta[$lang])
+                        ? $model->meta[$lang]
+                        : [
+                            'title' => '',
+                            'description' => '',
+                            'keywords' => ''
+                        ]
+                );
                 if (! $categoryInfo->save()) {
                     $transaction->rollBack();
                     $ret = [];

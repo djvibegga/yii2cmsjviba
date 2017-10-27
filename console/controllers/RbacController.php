@@ -9,6 +9,7 @@ use common\rbac\UserRoleRule;
 use backend\modules\articles\components\ArticleManager;
 use backend\components\ProfileManager;
 use backend\modules\pages\components\PageManager;
+use backend\modules\articles\components\CategoryManager;
 
 class RbacController extends Controller
 {
@@ -55,6 +56,17 @@ class RbacController extends Controller
         $pageView = $authManager->createPermission(PageManager::PERM_VIEW);
         $authManager->add($pageView);
         
+        $categoryCreate = $authManager->createPermission(CategoryManager::PERM_CREATE);
+        $authManager->add($categoryCreate);
+        $categoryUpdate = $authManager->createPermission(CategoryManager::PERM_UPDATE);
+        $authManager->add($categoryUpdate);
+        $categoryDelete = $authManager->createPermission(CategoryManager::PERM_DELETE);
+        $authManager->add($categoryDelete);
+        $categoryList = $authManager->createPermission(CategoryManager::PERM_LIST);
+        $authManager->add($categoryList);
+        $categoryView = $authManager->createPermission(CategoryManager::PERM_VIEW);
+        $authManager->add($categoryView);
+        
         $userCreate = $authManager->createPermission(ProfileManager::PERM_CREATE);
         $authManager->add($userCreate);
         $userUpdate = $authManager->createPermission(ProfileManager::PERM_UPDATE);
@@ -73,6 +85,13 @@ class RbacController extends Controller
         $authManager->addChild($admin, $articleList);
         $authManager->addChild($admin, $articleView);
         $authManager->addChild($user, $articleView);
+        
+        $authManager->addChild($admin, $categoryCreate);
+        $authManager->addChild($admin, $categoryUpdate);
+        $authManager->addChild($admin, $categoryDelete);
+        $authManager->addChild($admin, $categoryList);
+        $authManager->addChild($admin, $categoryView);
+        $authManager->addChild($user, $categoryView);
         
         $authManager->addChild($admin, $pageCreate);
         $authManager->addChild($admin, $pageUpdate);

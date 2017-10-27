@@ -12,6 +12,7 @@ use common\models\ObjectRecord;
 use common\interfaces\IHasSefUrl;
 use common\components\caching\CacheAdapterFactory;
 use common\components\caching\ICacheableDataSource;
+use common\components\PhotoBehavior;
 
 /**
  * This is the model class for table "article_category".
@@ -23,9 +24,10 @@ use common\components\caching\ICacheableDataSource;
  * @property integer $depth
  * @property integer $object_id
  * @property integer $status
- * @property string $created_at
- * @property string $updated_at
- * @property string $name
+ * @property string  $created_at
+ * @property string  $updated_at
+ * @property string  $name
+ * @property string  $photo
  */
 class ArticleCategory extends ObjectRecord implements IHasSefUrl, ICacheableDataSource
 {
@@ -89,6 +91,23 @@ class ArticleCategory extends ObjectRecord implements IHasSefUrl, ICacheableData
                     return new \yii\db\Expression('NOW()');
                 },
             ],
+            'photos' => [
+                'class' => PhotoBehavior::className(),
+                'photoAttributes' => ['photo'],
+                'storageBasePath' => Yii::getAlias('@backend/web') . '/upload/photos',
+                'storageBaseUrl' => '/upload/photos',
+                'formats' => [
+                    'small' => [
+                        'width' => 120
+                    ],
+                    'medium' => [
+                        'width' => 250
+                    ],
+                    'big' => [
+                        'width' => 400
+                    ]
+                ]
+            ],
             'nestedset' => [
                 'class' => NestedSetsBehavior::className(),
                 //'treeAttribute' => 'tree',
@@ -122,6 +141,7 @@ class ArticleCategory extends ObjectRecord implements IHasSefUrl, ICacheableData
             [['name'], 'required'],
             [['created_at', 'updated_at'], 'safe'],
             [['name'], 'string', 'max' => 64],
+            ['photo', 'string'],
             [['name'], 'unique'],
             ['status', 'in', 'range' => array_keys(self::getAvailableStatuses())]
         ];
@@ -143,7 +163,21 @@ class ArticleCategory extends ObjectRecord implements IHasSefUrl, ICacheableData
             'created_at' => 'Created At',
             'updated_at' => 'Updated At',
             'name' => 'Name',
+            'Photo' => 'Photo'
         ];
+    }
+    
+    /**
+     * {@inheritDoc}
+     * @see \yii\db\BaseActiveRecord::__set()
+     */
+    public function __set($name, $value)
+    {
+        if ($name == 'photo') {
+            $this->setPhotoAttributeWise($name, $value);
+        } else {
+            parent::__set($name, $value);
+        }
     }
     
     /**

@@ -204,38 +204,9 @@ class Article extends ObjectRecord implements IHasSefUrl, ICacheableDataSource
     public function __set($name, $value)
     {
         if ($name == 'photo') {
-            $this->setPhoto($value);
+            $this->setPhotoAttributeWise($name, $value);
         } else {
             parent::__set($name, $value);
-        }
-    }
-    
-    /**
-     * Sets photo attribute
-     * @param string|array $value photo data or photo data encoded via base64
-     * @return void
-     */
-    public function setPhoto($value)
-    {
-        if (is_string($value)) {
-            $data = base64_encode(base64_decode($value));
-            if ($data === $value) {
-                $this->setAttribute(
-                    'photo',
-                    empty($value) ? '{}' : base64_decode($value)
-                );
-            } else {
-                $this->setAttribute(
-                    'photo',
-                    $value
-                );
-            }
-        } elseif (is_array($value)) {
-            $this->setAttribute('photo', json_encode($value));
-        } else if ($value === null) {
-            $this->setAttribute('photo', '{}');
-        } else {
-            throw new \InvalidArgumentException('Value has bad format.');
         }
     }
     
