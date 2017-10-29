@@ -1,16 +1,14 @@
 {
-    "name": "yiisoft/yii2-app-advanced",
-    "description": "Yii 2 Advanced Project Template",
-    "keywords": ["yii2", "framework", "advanced", "project template"],
-    "homepage": "http://www.yiiframework.com/",
+    "name": "jviba/yii2-cms-template",
+    "description": "Yii 2 CMS Template",
+    "keywords": ["cms", "yii2", "advanced", "project template"],
+    "homepage": "https://github.com/djvibegga/yii2cmsjviba",
     "type": "project",
     "license": "BSD-3-Clause",
     "support": {
-        "issues": "https://github.com/yiisoft/yii2/issues?state=open",
-        "forum": "http://www.yiiframework.com/forum/",
-        "wiki": "http://www.yiiframework.com/wiki/",
-        "irc": "irc://irc.freenode.net/yii",
-        "source": "https://github.com/yiisoft/yii2"
+        "issues": "https://github.com/djvibegga/yii2cmsjviba/issues",
+        "wiki": "https://github.com/djvibegga/yii2cmsjviba/wiki",
+        "source": "https://github.com/djvibegga/yii2cmsjviba"
     },
     "minimum-stability": "stable",
     "require": {
