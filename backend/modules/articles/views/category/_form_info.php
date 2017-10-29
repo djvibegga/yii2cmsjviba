@@ -10,5 +10,7 @@
 <div class="category-info-form">
 
     <?= $form->field($info, '[' . $lang['name'] . ']url')->textInput() ?>
+    
+    <?= $form->field($info, '[' . $lang['name'] . ']description')->textInput() ?>
 
 </div>

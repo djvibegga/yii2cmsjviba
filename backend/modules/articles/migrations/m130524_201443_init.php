@@ -26,7 +26,8 @@ class m130524_201443_init extends Migration
             'article_category_id' => $this->integer()->notNull(),
             'lang_id' => $this->integer()->notNull(),
             'meta' => 'jsonb',
-            'url' => $this->string(256)->notNull()->unique()
+            'description' => $this->text()->notNull()->defaultValue(''),
+            'url' => $this->string(256)->notNull()->unique(),
         ]);
         $this->createIndex(
             'article_category_info_category_lang_idx',

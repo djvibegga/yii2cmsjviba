@@ -10,8 +10,10 @@ use common\components\MetaDataBehavior;
  *
  * @property integer $id
  * @property integer $article_category_id
+ * @property integer $lang_id
  * @property string  $url
  * @property string  $meta
+ * @property string  $description
  *
  * @property ArticleCategory $articleCategory
  */
@@ -46,6 +48,7 @@ class ArticleCategoryInfo extends \yii\db\ActiveRecord
             [['article_category_id'], 'integer'],
             [['url'], 'string', 'max' => 256],
             [['url'], 'unique'],
+            ['description', 'string'],
             [['article_category_id'], 'exist', 'skipOnError' => true, 'targetClass' => ArticleCategory::className(), 'targetAttribute' => ['article_category_id' => 'id']],
         ];
     }
@@ -59,6 +62,8 @@ class ArticleCategoryInfo extends \yii\db\ActiveRecord
             'id' => 'ID',
             'article_category_id' => 'Article Category ID',
             'url' => 'Url',
+            'meta' => 'Meta',
+            'description' => 'Description'
         ];
     }
 

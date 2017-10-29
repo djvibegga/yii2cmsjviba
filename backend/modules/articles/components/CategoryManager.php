@@ -75,9 +75,7 @@ class CategoryManager extends \common\components\Component
         }
         foreach ($langs as $id => $name) {
             $infoAttributes = isset($existingInfos[$name])
-                ? $existingInfos[$name]->getAttributes(
-                      ['url']
-                  )
+                ? $existingInfos[$name]->getAttributes()
                 : [];
             $model->infos[$name] = $infoAttributes;
             $model->meta[$name] = isset($existingInfos[$name])
