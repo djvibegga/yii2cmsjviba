@@ -77,14 +77,22 @@ class UploadAction extends Action
                 $model->{$this->uploadParam}->name = uniqid() . '.' . $model->{$this->uploadParam}->extension;
                 $request = Yii::$app->request;
                 
-                $width = $request->post('width', $this->width);
-                $height = $request->post('height', $this->height);
+                try {
+                    $sourceImg = Yii::$app->image->load($file->tempName);
+                    $xScale = $sourceImg->width / $width;
+                    $yScale = $sourceImg->height / $height;
+                    $w = intval($request->post('w')) * $xScale;
+                    $h = intval($request->post('h')) * $yScale;
+                    $x = $request->post('x') * $xScale;
+                    $y = $request->post('y') * $yScale;
+                } catch (\Exception $e) {
+                    Yii::error('Unable to resolve crop attributes because of error: ' . $e->getMessage());
+                    return;
+                }
                 
                 $image = Image::crop(
                     $file->tempName . $request->post('filename'),
-                    intval($request->post('w')),
-                    intval($request->post('h')),
-                    [$request->post('x'), $request->post('y')]
+                    $w, $h, [$x, $y]
                 );
                 
                 $resizeConfig = $this->getResizeConfigByModelClassName($this->modelClass);

@@ -40,6 +40,11 @@
                                 boxWidth: cropper.$new_photo_area.width(),
                                 boxHeight: cropper.$new_photo_area.height(),
                                 keySupport: false
+                            }, function() {
+                            	var $tracker = cropper.$img.parent().find('.jcrop-holder > .jcrop-tracker');
+                            	var $widget = cropper.$img.closest('.cropper-widget');
+                            	$widget.find('.width-input').val($tracker.width());
+                            	$widget.find('.height-input').val($tracker.height());
                             });
                         };
 
